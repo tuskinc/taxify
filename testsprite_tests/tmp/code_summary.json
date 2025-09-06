@@ -1,0 +1,61 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "React 18",
+    "Vite",
+    "Tailwind CSS",
+    "Supabase PostgreSQL",
+    "React Hook Form",
+    "Zod",
+    "jsPDF",
+    "Lucide React",
+    "Recharts"
+  ],
+  "features": [
+    {
+      "name": "User Authentication",
+      "description": "Supabase-based authentication system with sign-in, sign-up, and password reset",
+      "files": ["src/components/AuthWrapper.tsx", "src/lib/supabase.ts"]
+    },
+    {
+      "name": "User Profile Management",
+      "description": "User profile setup and management with tax scenario selection",
+      "files": ["src/components/UserProfileSetup.tsx", "src/components/TaxScenarioSelector.tsx"]
+    },
+    {
+      "name": "Financial Data Input",
+      "description": "Forms for personal and business financial data collection",
+      "files": ["src/components/PersonalFinanceForm.tsx", "src/components/BusinessFinanceForm.tsx"]
+    },
+    {
+      "name": "Tax Analysis Engine",
+      "description": "AI-powered tax analysis with optimization strategies and recommendations",
+      "files": ["src/components/ComprehensiveAnalysisReport.tsx", "src/lib/supabase.ts"]
+    },
+    {
+      "name": "PDF Report Generation",
+      "description": "Client-side PDF generation for financial reports using jsPDF",
+      "files": ["src/api/generate-financial-report.ts", "src/utils/pdfUtils.ts", "src/api/client.ts"]
+    },
+    {
+      "name": "Dashboard Interface",
+      "description": "Main dashboard for viewing tax analysis and financial summaries",
+      "files": ["src/components/Dashboard.tsx"]
+    },
+    {
+      "name": "Main Application",
+      "description": "Core application component orchestrating user flow and state management",
+      "files": ["src/App.tsx", "src/main.tsx"]
+    },
+    {
+      "name": "Styling System",
+      "description": "Tailwind CSS configuration with custom component styles",
+      "files": ["src/index.css", "tailwind.config.js", "postcss.config.js"]
+    },
+    {
+      "name": "Type Definitions",
+      "description": "TypeScript interfaces and database schema definitions",
+      "files": ["src/lib/supabase.ts"]
+    }
+  ]
+}
