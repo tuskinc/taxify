@@ -1,5 +1,7 @@
+/// <reference types="node" />
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import pdf from 'pdf-parse';
 import * as XLSX from 'xlsx';
 import { parse } from 'csv-parse/sync';
@@ -8,7 +10,7 @@ import { docxParser } from 'docx-parser';
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
 // Types
 type FileType = 'application/pdf' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' | 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' | 'text/csv';
@@ -33,41 +35,32 @@ export async function POST(request: Request) {
     let textContent = '';
 
     // 2. Process the file based on its type
-    switch (fileType) {
-      case 'application/pdf':
-        const pdfData = await pdf(buffer);
-        textContent = pdfData.text;
-        break;
-
-      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        textContent = await new Promise((resolve, reject) => {
-          docxParser(buffer, (err, text) => {
-            if (err) reject(err);
-            else resolve(text || '');
-          });
+    if (fileType === 'application/pdf') {
+      const pdfData = await pdf(buffer);
+      textContent = pdfData.text;
+    } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      textContent = await new Promise((resolve, reject) => {
+        docxParser(buffer, (err: Error | null, text?: string) => {
+          if (err) reject(err);
+          else resolve(text || '');
         });
-        break;
-
-      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-        const workbook = XLSX.read(buffer);
-        textContent = workbook.SheetNames
-          .map(sheetName => {
-            const worksheet = workbook.Sheets[sheetName];
-            return XLSX.utils.sheet_to_csv(worksheet);
-          })
-          .join('\n\n');
-        break;
-
-      case 'text/csv':
-        const records = parse(buffer.toString(), {
-          columns: true,
-          skip_empty_lines: true,
-        });
-        textContent = records.map(JSON.stringify).join('\n');
-        break;
-
-      default:
-        throw new Error(`Unsupported file type: ${fileType}`);
+      });
+    } else if (fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      const workbook = XLSX.read(buffer);
+      textContent = workbook.SheetNames
+        .map(sheetName => {
+          const worksheet = workbook.Sheets[sheetName];
+          return XLSX.utils.sheet_to_csv(worksheet);
+        })
+        .join('\n\n');
+    } else if (fileType === 'text/csv') {
+      const records = parse(buffer.toString(), {
+        columns: true,
+        skip_empty_lines: true,
+      }) as Record<string, unknown>[];
+      textContent = records.map(record => JSON.stringify(record)).join('\n');
+    } else {
+      throw new Error(`Unsupported file type: ${fileType}`);
     }
 
     // 3. Extract financial data using Claude
@@ -91,7 +84,12 @@ export async function POST(request: Request) {
   }
 }
 
-async function extractFinancialData(text: string): Promise<any> {
+interface FinancialData {
+  // Define the structure of your financial data here
+  [key: string]: unknown;
+}
+
+async function extractFinancialData(text: string): Promise<FinancialData> {
   const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
   if (!CLAUDE_API_KEY) {
     throw new Error('Claude API key not configured');

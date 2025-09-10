@@ -9,6 +9,6 @@
   background-color: #2563eb;
   height: 100%;
   border-radius: 9999px;
-  transition: all 0.3s ease-in-out;
-  width: var(--progress-width, 0%);
+  transition: width 0.3s ease-in-out;
+  width: 0%;
 }

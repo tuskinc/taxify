@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { supabase } from '../lib/supabase';
 import FinancialDataReview from './FinancialDataReview';
@@ -50,6 +50,13 @@ interface DocumentUploadProps {
 export default function DocumentUpload({ onUploadComplete, onError }: DocumentUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const progressFillRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (progressFillRef.current) {
+      progressFillRef.current.style.width = `${progress}%`;
+    }
+  }, [progress]);
   const [fileName, setFileName] = useState<string | null>(null);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
 
@@ -94,19 +101,16 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          fileUrl: publicUrl,
-          fileName: file.name,
-          fileType: file.type,
-        }),
+          fileUrl: publicUrl
+        })
       });
-
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to process document');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+      
       const result = await response.json();
-      setProgress(100);
+      onUploadComplete(result.data);
       setExtractedData(result.data);
     } catch (error) {
       console.error('Upload error:', error);
@@ -114,7 +118,7 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
     } finally {
       setIsUploading(false);
     }
-  }, [onUploadComplete, onError]);
+  }, [onError, onUploadComplete]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -157,8 +161,8 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
               <p className="font-medium">Processing {fileName}...</p>
               <div className={styles.progressBar}>
                 <div 
+                  ref={progressFillRef}
                   className={styles.progressFill}
-                  style={{ '--progress-width': `${progress}%` } as React.CSSProperties}
                 ></div>
               </div>
               <p className="text-sm text-gray-500">{progress}% complete</p>
