@@ -1,14 +1,58 @@
 import { createClient } from '@supabase/supabase-js';
 
 // These will be replaced with actual values from environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Missing Supabase environment variables. Please check your .env.local file.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+  },
+});
+
+// Storage bucket names
+export const BUCKET_NAMES = {
+  DOCUMENTS: 'documents',
+} as const;
+
+// File upload settings
+export const UPLOAD_SETTINGS = {
+  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+  ALLOWED_FILE_TYPES: [
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/csv',
+  ],
+};
+
+// Helper functions for storage
+export const storageHelpers = {
+  getFileExtension: (filename: string): string => {
+    return filename.split('.').pop()?.toLowerCase() || '';
+  },
+
+  generateUniqueFilename: (filename: string): string => {
+    const ext = storageHelpers.getFileExtension(filename);
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 10);
+    return `${timestamp}_${randomStr}.${ext}`;
+  },
+
+  isFileTypeAllowed: (file: File): boolean => {
+    return UPLOAD_SETTINGS.ALLOWED_FILE_TYPES.includes(file.type);
+  },
+
+  isFileSizeValid: (file: File): boolean => {
+    return file.size <= UPLOAD_SETTINGS.MAX_FILE_SIZE;
+  },
+};
 
 // Helper functions for tax calculations
 export const taxHelpers = {
