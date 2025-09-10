@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExtractedData } from './DocumentUpload';
+import type { ExtractedData } from './DocumentUpload';
 
 type Section = 'personalFinances' | 'businessFinances';
 
@@ -45,8 +45,8 @@ export default function FinancialDataReview({
 }) {
   const [formData, setFormData] = useState<ExtractedData>(data);
 
-  const handleChange = (section: Section, field: string, value: string) => {
-    setFormData(prev => ({
+  const handleChange = (section: Section, field: keyof ExtractedData[typeof section], value: string) => {
+    setFormData((prev: ExtractedData) => ({
       ...prev,
       [section]: {
         ...prev[section],
@@ -80,10 +80,11 @@ export default function FinancialDataReview({
                       <input
                         type="number"
                         className="block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
-                        value={formData[section as Section][key] || 0}
-                        onChange={(e) => handleChange(section as Section, key, e.target.value)}
+                        value={formData[section as Section][key as keyof ExtractedData[Section]] || 0}
+                        onChange={(e) => handleChange(section as Section, key as keyof ExtractedData[Section], e.target.value)}
                         min="0"
                         step="1"
+                        aria-label={`Enter ${label.toLowerCase()}`}
                       />
                     </div>
                   </div>

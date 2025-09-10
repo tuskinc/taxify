@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { supabase } from '../lib/supabase';
 import FinancialDataReview from './FinancialDataReview';
+import styles from './DocumentUpload.module.css';
 
 const ALLOWED_FILE_TYPES = {
   'application/pdf': ['.pdf'],
@@ -10,7 +11,7 @@ const ALLOWED_FILE_TYPES = {
   'text/csv': ['.csv'],
 };
 
-interface ExtractedData {
+export interface ExtractedData {
   personalFinances: {
     salary_income: number;
     freelance_income: number;
@@ -154,10 +155,10 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
           {isUploading ? (
             <div className="space-y-2">
               <p className="font-medium">Processing {fileName}...</p>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className={styles.progressBar}>
                 <div 
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
+                  className={styles.progressFill}
+                  style={{ '--progress-width': `${progress}%` } as React.CSSProperties}
                 ></div>
               </div>
               <p className="text-sm text-gray-500">{progress}% complete</p>
