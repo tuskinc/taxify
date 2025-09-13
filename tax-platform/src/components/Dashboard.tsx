@@ -1,4 +1,4 @@
-import React from 'react'
+import { } from 'react'
 import { BarChart3, FileText, Calendar, TrendingUp, DollarSign, Building2, Users, Calculator } from 'lucide-react'
 
 interface DashboardProps {
@@ -10,7 +10,6 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ 
-  user, 
   userProfile, 
   personalFinances, 
   businessFinances, 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { apiClient } from '../api/client'
 import { Download, Printer, ArrowLeft, AlertCircle, CheckCircle, TrendingUp, Calculator, DollarSign } from 'lucide-react'
 
@@ -13,10 +13,8 @@ interface ComprehensiveAnalysisReportProps {
 
 export default function ComprehensiveAnalysisReport({ 
   user, 
-  userProfile, 
   personalFinances, 
   businessFinances, 
-  onComplete, 
   onBackToDashboard 
 }: ComprehensiveAnalysisReportProps) {
   const [downloading, setDownloading] = useState(false)
@@ -41,7 +39,7 @@ export default function ComprehensiveAnalysisReport({
 
   // Calculate basic tax metrics
   const personalTaxableIncome = personalFinances.annual_income + personalFinances.other_income - personalFinances.deductions
-  const personalNetIncome = personalTaxableIncome - personalFinances.credits
+  // const personalNetIncome = personalTaxableIncome - personalFinances.credits
 
   const businessNetIncome = businessFinances ? businessFinances.annual_revenue - businessFinances.business_expenses : 0
   const totalTaxableIncome = personalTaxableIncome + (businessFinances ? businessNetIncome : 0)

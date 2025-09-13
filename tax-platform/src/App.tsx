@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import AuthWrapper from './components/AuthWrapper'
 import UserProfileSetup from './components/UserProfileSetup'
@@ -16,6 +16,7 @@ export interface UserProfile {
   birth_date: string
   dependents: number
   spouse_income: number
+  tax_scenarios: string[]
   created_at: string
   updated_at: string
 }
@@ -64,7 +65,7 @@ function App() {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         setUser(session?.user ?? null)
         if (session?.user) {
           await checkUserProfile(session.user.id)
