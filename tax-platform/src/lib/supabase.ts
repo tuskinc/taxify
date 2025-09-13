@@ -179,7 +179,7 @@ export interface Database {
 
 // Tax calculation helpers
 export const taxHelpers = {
-  calculateTax: (income: number, brackets: any[], country: string) => {
+  calculateTax: (income: number, brackets: any[], _country: string) => {
     // Basic tax calculation logic
     let totalTax = 0
     let remainingIncome = income

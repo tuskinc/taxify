@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { supabase } from '../lib/supabase'
-import { DollarSign, Calculator, AlertCircle, CheckCircle } from 'lucide-react'
+import { DollarSign, Calculator, AlertCircle } from 'lucide-react'
 
 const personalFinanceSchema = z.object({
   annual_income: z.number().min(0, 'Annual income must be positive'),
@@ -94,11 +94,11 @@ export default function PersonalFinanceForm({ userProfile, onComplete }: Persona
     return Math.max(0, totalIncome - totalDeductions)
   }
 
-  const calculateNetIncome = () => {
-    const taxableIncome = calculateTaxableIncome()
-    const totalCredits = watchedValues.credits || 0
-    return Math.max(0, taxableIncome - totalCredits)
-  }
+  // const calculateNetIncome = () => {
+  //   const taxableIncome = calculateTaxableIncome()
+  //   const totalCredits = watchedValues.credits || 0
+  //   return Math.max(0, taxableIncome - totalCredits)
+  // }
 
   if (showReview && formData) {
     return (
