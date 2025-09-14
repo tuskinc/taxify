@@ -44,9 +44,26 @@ export default function ComprehensiveAnalysisReport({
   const businessNetIncome = businessFinances ? businessFinances.annual_revenue - businessFinances.business_expenses : 0
   const totalTaxableIncome = personalTaxableIncome + (businessFinances ? businessNetIncome : 0)
 
-  // Mock tax calculations (in a real app, these would come from your tax calculation service)
-  const estimatedTax = totalTaxableIncome * 0.25 // Simplified 25% tax rate
-  const effectiveRate = totalTaxableIncome > 0 ? (estimatedTax / totalTaxableIncome) * 100 : 0
+  // Enhanced tax calculations with before/after cuts
+  const totalIncome = personalFinances.annual_income + personalFinances.other_income + (businessFinances ? businessFinances.annual_revenue : 0)
+  const totalDeductions = personalFinances.deductions + (businessFinances ? businessFinances.business_expenses : 0)
+  const totalCredits = personalFinances.credits || 0
+  
+  // Tax calculation without any deductions or credits (worst case scenario)
+  const taxBeforeCuts = totalIncome * 0.25 // Simplified 25% tax rate on gross income
+  
+  // Tax calculation after deductions but before credits
+  const taxAfterDeductions = totalTaxableIncome * 0.25
+  
+  // Tax calculation after both deductions and credits
+  const taxAfterCuts = Math.max(0, taxAfterDeductions - totalCredits)
+  
+  // Calculate savings from tax cuts
+  const taxCutSavings = taxBeforeCuts - taxAfterCuts
+  
+  // Legacy calculations for backward compatibility
+  const estimatedTax = taxAfterCuts
+  const effectiveRate = totalTaxableIncome > 0 ? (taxAfterCuts / totalTaxableIncome) * 100 : 0
 
   const recommendations = [
     {
@@ -152,6 +169,37 @@ export default function ComprehensiveAnalysisReport({
             <h2 className="text-lg font-medium text-gray-900">Executive Summary</h2>
           </div>
           <div className="px-6 py-4">
+            {/* Tax Impact Display */}
+            <div className="bg-gradient-to-r from-red-50 to-green-50 border border-gray-200 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Your Tax Impact Analysis</h3>
+              <div className="space-y-4">
+                {/* Without tax cuts */}
+                <div className="bg-red-100 border-l-4 border-red-500 p-4 rounded-r-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-red-800 font-medium">Without tax cuts, you would have paid:</span>
+                    <span className="text-2xl font-bold text-red-900">${taxBeforeCuts.toLocaleString()}</span>
+                  </div>
+                </div>
+                
+                {/* With tax cuts */}
+                <div className="bg-blue-100 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-800 font-medium">With tax cuts, you only paid:</span>
+                    <span className="text-2xl font-bold text-blue-900">${taxAfterCuts.toLocaleString()}</span>
+                  </div>
+                </div>
+                
+                {/* Savings message */}
+                <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded-r-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-800 font-medium">🎉 You have earned $Z from your tax cuts this year!</span>
+                    <span className="text-2xl font-bold text-green-900">${taxCutSavings.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Metrics */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="flex items-center">
@@ -166,8 +214,8 @@ export default function ComprehensiveAnalysisReport({
                 <div className="flex items-center">
                   <Calculator className="h-8 w-8 text-green-600" />
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-green-600">Estimated Tax</p>
-                    <p className="text-2xl font-bold text-green-900">${estimatedTax.toLocaleString()}</p>
+                    <p className="text-sm font-medium text-green-600">Final Tax Owed</p>
+                    <p className="text-2xl font-bold text-green-900">${taxAfterCuts.toLocaleString()}</p>
                   </div>
                 </div>
               </div>

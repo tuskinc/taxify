@@ -7,6 +7,7 @@ import PersonalFinanceForm from './components/PersonalFinanceForm'
 import BusinessFinanceForm from './components/BusinessFinanceForm'
 import ComprehensiveAnalysisReport from './components/ComprehensiveAnalysisReport'
 import Dashboard from './components/Dashboard'
+import TaxCalculationTest from './components/TaxCalculationTest'
 
 export interface UserProfile {
   id: string
@@ -43,7 +44,7 @@ export interface BusinessFinances {
   updated_at: string
 }
 
-type Step = 'auth' | 'profile' | 'scenario' | 'personal' | 'business' | 'analysis' | 'dashboard'
+type Step = 'auth' | 'profile' | 'scenario' | 'personal' | 'business' | 'analysis' | 'dashboard' | 'test'
 
 function App() {
   const [user, setUser] = useState<any>(null)
@@ -175,6 +176,12 @@ function App() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading Zin...</p>
+          <button
+            onClick={() => setCurrentStep('test')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Test Tax Calculations
+          </button>
         </div>
       </div>
     )
@@ -233,6 +240,10 @@ function App() {
           businessFinances={businessFinances}
           onStartNewAnalysis={() => setCurrentStep('analysis')}
         />
+      )}
+      
+      {currentStep === 'test' && (
+        <TaxCalculationTest />
       )}
     </div>
   )
