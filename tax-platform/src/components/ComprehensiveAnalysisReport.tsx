@@ -46,7 +46,6 @@ export default function ComprehensiveAnalysisReport({
 
   // Enhanced tax calculations with before/after cuts
   const totalIncome = personalFinances.annual_income + personalFinances.other_income + (businessFinances ? businessFinances.annual_revenue : 0)
-  const totalDeductions = personalFinances.deductions + (businessFinances ? businessFinances.business_expenses : 0)
   const totalCredits = personalFinances.credits || 0
   
   // Tax calculation without any deductions or credits (worst case scenario)
@@ -62,7 +61,6 @@ export default function ComprehensiveAnalysisReport({
   const taxCutSavings = taxBeforeCuts - taxAfterCuts
   
   // Legacy calculations for backward compatibility
-  const estimatedTax = taxAfterCuts
   const effectiveRate = totalTaxableIncome > 0 ? (taxAfterCuts / totalTaxableIncome) * 100 : 0
 
   const recommendations = [
