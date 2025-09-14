@@ -1,5 +1,3 @@
-import React from 'react'
-
 // Test component to verify tax calculations
 export default function TaxCalculationTest() {
   // Sample data for testing
