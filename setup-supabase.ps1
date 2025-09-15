@@ -27,6 +27,8 @@ Write-Host "📁 Migration files to run in order:" -ForegroundColor Cyan
 Write-Host "   - supabase/migrations/001_initial_schema.sql" -ForegroundColor White
 Write-Host "   - supabase/migrations/002_row_level_security.sql" -ForegroundColor White
 Write-Host "   - supabase/migrations/003_sample_data.sql" -ForegroundColor White
+Write-Host "   - supabase/migrations/004_storage_documents.sql" -ForegroundColor White
+Write-Host "   - supabase/migrations/005_align_users_table.sql" -ForegroundColor White
 Write-Host ""
 
 Write-Host "🔗 Quick Links:" -ForegroundColor Cyan

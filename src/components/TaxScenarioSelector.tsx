@@ -1,210 +1,187 @@
-import { useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { TaxScenario } from '../App';
-import { User, Building2, Calculator, TrendingUp, ArrowRight, CheckCircle } from 'lucide-react';
+import { useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { User, Building2, Users, AlertCircle } from 'lucide-react'
 
 interface TaxScenarioSelectorProps {
-  onSelect: (scenario: TaxScenario) => void;
+  userProfile: any
+  onComplete: () => void
 }
 
-const scenarios = [
-  {
-    id: 'personal' as TaxScenario,
-    title: 'Personal & Family Taxes',
-    description: 'Optimize your personal income taxes, deductions, and family tax credits',
-    icon: User,
-    features: [
-      'Personal income tax optimization',
-      'Family tax credit maximization',
-      'Retirement contribution planning',
-      'Deduction optimization strategies',
-      'Tax bracket analysis',
-      'Quarterly estimated tax planning'
-    ],
-    estimatedTime: '5-7 minutes',
-    bestFor: 'Individuals, families, employees, retirees'
-  },
-  {
-    id: 'business' as TaxScenario,
-    title: 'Business Tax Planning',
-    description: 'Strategic business tax planning for entrepreneurs and business owners',
-    icon: Building2,
-    features: [
-      'Business expense optimization',
-      'Corporate tax rate analysis',
-      'Business structure optimization',
-      'Depreciation and amortization',
-      'Employee benefit planning',
-      'Quarterly business tax planning'
-    ],
-    estimatedTime: '7-10 minutes',
-    bestFor: 'Business owners, entrepreneurs, freelancers'
-  },
-  {
-    id: 'combined' as TaxScenario,
-    title: 'Combined Personal + Business',
-    description: 'Comprehensive tax strategy combining personal and business optimization',
-    icon: TrendingUp,
-    features: [
-      'Personal and business tax integration',
-      'Salary vs dividend optimization',
-      'Business expense personal benefit analysis',
-      'Family business tax planning',
-      'Retirement planning through business',
-      'Comprehensive tax calendar planning'
-    ],
-    estimatedTime: '10-12 minutes',
-    bestFor: 'Business owners with families, entrepreneurs with personal investments'
+export default function TaxScenarioSelector({ userProfile, onComplete }: TaxScenarioSelectorProps) {
+  const [selectedScenarios, setSelectedScenarios] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const scenarios = [
+    {
+      id: 'personal',
+      title: 'Personal & Family Taxes',
+      description: 'Analyze your personal income, deductions, and family tax situation',
+      icon: Users,
+      features: [
+        'Personal income analysis',
+        'Family tax optimization',
+        'Deduction recommendations',
+        'Tax credit opportunities'
+      ]
+    },
+    {
+      id: 'business',
+      title: 'Business Taxes',
+      description: 'Optimize your business tax strategy and compliance',
+      icon: Building2,
+      features: [
+        'Business income analysis',
+        'Expense optimization',
+        'Depreciation strategies',
+        'Quarterly tax planning'
+      ]
+    },
+    {
+      id: 'combined',
+      title: 'Combined Analysis',
+      description: 'Comprehensive analysis of both personal and business finances',
+      icon: User,
+      features: [
+        'Integrated tax strategy',
+        'Cross-entity optimization',
+        'Comprehensive planning',
+        'Advanced tax strategies'
+      ]
+    }
+  ]
+
+  const handleScenarioToggle = (scenarioId: string) => {
+    setSelectedScenarios(prev => {
+      if (prev.includes(scenarioId)) {
+        return prev.filter(id => id !== scenarioId)
+      } else {
+        return [...prev, scenarioId]
+      }
+    })
   }
-];
 
-export default function TaxScenarioSelector({ onSelect }: TaxScenarioSelectorProps) {
-  const [selectedScenario, setSelectedScenario] = useState<TaxScenario | null>(null);
-  const [loading, setLoading] = useState(false);
+  const handleSubmit = async () => {
+    if (selectedScenarios.length === 0) {
+      setError('Please select at least one tax scenario')
+      return
+    }
 
-  const handleScenarioSelect = async (scenario: TaxScenario) => {
-    setSelectedScenario(scenario);
-    setLoading(true);
+    setLoading(true)
+    setError('')
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        // Update user's tax scenarios
-        const { error } = await supabase
-          .from('users')
-          .update({ 
-            tax_scenarios: scenario === 'combined' ? ['personal', 'business'] : [scenario]
-          })
-          .eq('id', user.id);
+      const { error } = await supabase
+        .from('users')
+        .update({ tax_scenarios: selectedScenarios })
+        .eq('id', userProfile.id)
 
-        if (error) {
-          console.error('Error updating tax scenarios:', error);
-        }
-      }
-    } catch (error) {
-      console.error('Error updating tax scenarios:', error);
+      if (error) throw error
+
+      onComplete()
+    } catch (error: any) {
+      setError(error.message)
     } finally {
-      setLoading(false);
-      onSelect(scenario);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Choose Your Tax Analysis Type
-        </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Select the type of tax analysis that best fits your needs. 
-          You can always change this later or run multiple analyses.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {scenarios.map((scenario) => {
-          const IconComponent = scenario.icon;
-          const isSelected = selectedScenario === scenario.id;
-          
-          return (
-            <div
-              key={scenario.id}
-              className={`card cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                isSelected 
-                  ? 'ring-2 ring-primary-500 bg-primary-50 border-primary-200' 
-                  : 'hover:border-primary-300'
-              }`}
-              onClick={() => setSelectedScenario(scenario.id)}
-            >
-              <div className="text-center mb-4">
-                <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 ${
-                  isSelected ? 'bg-primary-600' : 'bg-gray-100'
-                }`}>
-                  <IconComponent className={`w-8 h-8 ${
-                    isSelected ? 'text-white' : 'text-gray-600'
-                  }`} />
-                </div>
-                <h3 className={`text-xl font-semibold ${
-                  isSelected ? 'text-primary-700' : 'text-gray-900'
-                }`}>
-                  {scenario.title}
-                </h3>
-                <p className={`text-sm mt-1 ${
-                  isSelected ? 'text-primary-600' : 'text-gray-500'
-                }`}>
-                  {scenario.description}
-                </p>
-              </div>
-
-              {/* Features */}
-              <div className="space-y-2 mb-4">
-                {scenario.features.map((feature, index) => (
-                  <div key={index} className="flex items-center text-sm">
-                    <CheckCircle className="w-4 h-4 text-success-500 mr-2 flex-shrink-0" />
-                    <span className={isSelected ? 'text-primary-700' : 'text-gray-600'}>
-                      {feature}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Meta Information */}
-              <div className="border-t border-gray-200 pt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Estimated time:</span>
-                  <span className="font-medium text-gray-700">{scenario.estimatedTime}</span>
-                </div>
-                <div className="text-xs text-gray-500">
-                  Best for: {scenario.bestFor}
-                </div>
-              </div>
-
-              {/* Selection Indicator */}
-              {isSelected && (
-                <div className="absolute top-4 right-4">
-                  <div className="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Continue Button */}
-      <div className="text-center">
-        <button
-          onClick={() => selectedScenario && handleScenarioSelect(selectedScenario)}
-          disabled={!selectedScenario || loading}
-          className="btn-primary text-lg px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? (
-            <div className="flex items-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-              Setting up analysis...
-            </div>
-          ) : (
-            <div className="flex items-center">
-              Continue with {selectedScenario ? scenarios.find(s => s.id === selectedScenario)?.title : 'Analysis'}
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </div>
-          )}
-        </button>
-      </div>
-
-      {/* Help Text */}
-      <div className="mt-8 text-center">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto">
-          <h4 className="font-medium text-blue-900 mb-2">💡 Need Help Choosing?</h4>
-          <p className="text-sm text-blue-700">
-            <strong>Personal:</strong> If you're an employee or individual with personal finances<br/>
-            <strong>Business:</strong> If you own a business or are self-employed<br/>
-            <strong>Combined:</strong> If you want to optimize both personal and business taxes together
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-xl">Z</span>
+          </div>
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+            Choose Your Tax Analysis
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Select the type of tax analysis you'd like to perform
           </p>
+        </div>
+
+        {error && (
+          <div className="mb-6 flex items-center space-x-2 text-red-600 text-sm">
+            <AlertCircle className="h-4 w-4" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {scenarios.map((scenario) => {
+            const Icon = scenario.icon
+            const isSelected = selectedScenarios.includes(scenario.id)
+            
+            return (
+              <div
+                key={scenario.id}
+                className={`relative cursor-pointer rounded-lg border-2 p-6 transition-all duration-200 ${
+                  isSelected
+                    ? 'border-blue-500 bg-blue-50 shadow-lg'
+                    : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
+                }`}
+                onClick={() => handleScenarioToggle(scenario.id)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-lg ${
+                      isSelected ? 'bg-blue-100' : 'bg-gray-100'
+                    }`}>
+                      <Icon className={`h-6 w-6 ${
+                        isSelected ? 'text-blue-600' : 'text-gray-600'
+                      }`} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {scenario.title}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {scenario.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                    isSelected
+                      ? 'border-blue-500 bg-blue-500'
+                      : 'border-gray-300'
+                  }`}>
+                    {isSelected && (
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <ul className="space-y-2">
+                    {scenario.features.map((feature, index) => (
+                      <li key={index} className="flex items-center text-sm text-gray-600">
+                        <div className={`w-1.5 h-1.5 rounded-full mr-2 ${
+                          isSelected ? 'bg-blue-500' : 'bg-gray-400'
+                        }`}></div>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <div className="mt-8 text-center">
+          <button
+            onClick={handleSubmit}
+            disabled={loading || selectedScenarios.length === 0}
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+            ) : null}
+            Continue to Financial Details
+          </button>
         </div>
       </div>
     </div>
-  );
+  )
 }

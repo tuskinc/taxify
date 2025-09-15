@@ -35,6 +35,8 @@ Choose one method:
    - `supabase/migrations/001_initial_schema.sql`
    - `supabase/migrations/002_row_level_security.sql`
    - `supabase/migrations/003_sample_data.sql`
+   - `supabase/migrations/004_storage_documents.sql`
+   - `supabase/migrations/005_align_users_table.sql`
 3. Click **"Run"** for each file
 
 #### Option B: Supabase CLI (Advanced)
@@ -48,7 +50,7 @@ supabase login
 # Link project
 supabase link --project-ref your-project-ref
 
-# Push migrations
+# Push migrations (includes new storage and users alignment)
 supabase db push
 ```
 

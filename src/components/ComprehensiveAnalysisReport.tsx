@@ -1,197 +1,374 @@
-import React, { useState } from 'react';
-import { TaxScenario, PersonalFinances, BusinessFinances } from '../App';
-import { RefreshCw, Download, Printer, FileText } from 'lucide-react';
-import { apiClient } from '../api/client';
+import { useState } from 'react'
+import { apiClient } from '../api/client'
+import { Download, Printer, ArrowLeft, AlertCircle, CheckCircle, TrendingUp, Calculator, DollarSign } from 'lucide-react'
 
 interface ComprehensiveAnalysisReportProps {
-  scenario: TaxScenario;
-  personalData: Partial<PersonalFinances> | null;
-  businessData: Partial<BusinessFinances> | null;
-  onReset: () => void;
+  user: any
+  userProfile: any
+  personalFinances: any
+  businessFinances?: any
+  onComplete: () => void
+  onBackToDashboard: () => void
 }
 
-export default function ComprehensiveAnalysisReport({
-  scenario,
-  personalData,
-  businessData,
-  onReset
+export default function ComprehensiveAnalysisReport({ 
+  user, 
+  personalFinances, 
+  businessFinances, 
+  onBackToDashboard 
 }: ComprehensiveAnalysisReportProps) {
-  const [downloading, setDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState<string | null>(null);
-
-  const handlePrint = () => {
-    window.print();
-  };
+  const [downloading, setDownloading] = useState(false)
+  const [downloadError, setDownloadError] = useState('')
 
   const handleDownload = async () => {
+    setDownloading(true)
+    setDownloadError('')
+
     try {
-      setDownloading(true);
-      setDownloadError(null);
-      
-      // Get current user ID from Supabase
-      const { data: { user } } = await import('../lib/supabase').then(m => m.supabase.auth.getUser());
-      
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-      
-      await apiClient.downloadReport(user.id);
-    } catch (error) {
-      console.error('Error downloading report:', error);
-      setDownloadError(error instanceof Error ? error.message : 'Failed to download report');
+      await apiClient.downloadReport(user.id)
+    } catch (error: any) {
+      setDownloadError(error.message || 'Failed to download report')
     } finally {
-      setDownloading(false);
+      setDownloading(false)
     }
-  };
+  }
+
+  const handlePrint = () => {
+    window.print()
+  }
+
+  // Calculate basic tax metrics
+  const personalTaxableIncome = personalFinances.annual_income + personalFinances.other_income - personalFinances.deductions
+  // const personalNetIncome = personalTaxableIncome - personalFinances.credits
+
+  const businessNetIncome = businessFinances ? businessFinances.annual_revenue - businessFinances.business_expenses : 0
+  const totalTaxableIncome = personalTaxableIncome + (businessFinances ? businessNetIncome : 0)
+
+  // Enhanced tax calculations with before/after cuts
+  const totalIncome = personalFinances.annual_income + personalFinances.other_income + (businessFinances ? businessFinances.annual_revenue : 0)
+  const totalCredits = personalFinances.credits || 0
+  
+  // Tax calculation without any deductions or credits (worst case scenario)
+  const taxBeforeCuts = totalIncome * 0.25 // Simplified 25% tax rate on gross income
+  
+  // Tax calculation after deductions but before credits
+  const taxAfterDeductions = totalTaxableIncome * 0.25
+  
+  // Tax calculation after both deductions and credits
+  const taxAfterCuts = Math.max(0, taxAfterDeductions - totalCredits)
+  
+  // Calculate savings from tax cuts
+  const taxCutSavings = taxBeforeCuts - taxAfterCuts
+  
+  // Legacy calculations for backward compatibility
+  const effectiveRate = totalTaxableIncome > 0 ? (taxAfterCuts / totalTaxableIncome) * 100 : 0
+
+  const recommendations = [
+    {
+      category: 'Income Optimization',
+      items: [
+        'Consider maximizing your 401(k) contributions to reduce taxable income',
+        'Look into Health Savings Account (HSA) contributions if eligible',
+        'Consider tax-loss harvesting for investment accounts'
+      ]
+    },
+    {
+      category: 'Deduction Opportunities',
+      items: [
+        'Maximize itemized deductions if they exceed the standard deduction',
+        'Consider charitable giving strategies for tax benefits',
+        'Review home office deductions if applicable'
+      ]
+    },
+    {
+      category: 'Tax Credits',
+      items: [
+        'Verify eligibility for Earned Income Tax Credit (EITC)',
+        'Check for education-related tax credits',
+        'Review child tax credit opportunities'
+      ]
+    }
+  ]
+
+  if (businessFinances) {
+    recommendations.push({
+      category: 'Business Tax Strategies',
+      items: [
+        'Consider Section 179 deductions for business equipment',
+        'Review business expense categorization for maximum deductions',
+        'Explore retirement plan options for business owners'
+      ]
+    })
+  }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">Comprehensive Tax Analysis Report</h2>
-          <p className="text-gray-600">
-            Your personalized tax optimization strategy for {scenario} analysis
-          </p>
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="bg-white shadow rounded-lg mb-6">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">Z</span>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Tax Analysis Report</h1>
+                  <p className="text-sm text-gray-600">Generated on {new Date().toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={onBackToDashboard}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Dashboard
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print
+                </button>
+                <button
+                  onClick={handleDownload}
+                  disabled={downloading}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {downloading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <Download className="h-4 w-4 mr-2" />
+                  )}
+                  Download PDF
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Analysis Summary */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-semibold text-blue-800 mb-3">Analysis Summary</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {scenario === 'personal' ? 'Personal' : 
-                   scenario === 'business' ? 'Business' : 'Combined'}
-                </div>
-                <div className="text-gray-600">Analysis Type</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  ${personalData ? 
-                    (personalData.salary_income || 0) + 
-                    (personalData.freelance_income || 0) + 
-                    (personalData.investment_income || 0) + 
-                    (personalData.rental_income || 0) + 
-                    (personalData.capital_gains || 0) : 0
-                  .toLocaleString()}
-                </div>
-                <div className="text-gray-600">Total Personal Income</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  ${businessData ? businessData.revenue?.toLocaleString() || '0' : '0'}
-                </div>
-                <div className="text-gray-600">Business Revenue</div>
+        {downloadError && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="flex">
+              <AlertCircle className="h-5 w-5 text-red-400" />
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Download Error</h3>
+                <p className="mt-1 text-sm text-red-700">{downloadError}</p>
               </div>
             </div>
           </div>
+        )}
 
-          {/* Tax Optimization Strategies */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Tax Optimization Strategies</h3>
-            <div className="space-y-4">
-              <div className="border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-2">Retirement Planning</h4>
-                <p className="text-gray-600 text-sm">
-                  Maximize your retirement contributions to reduce taxable income and build wealth.
-                </p>
-              </div>
-              
-              <div className="border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-2">Deduction Optimization</h4>
-                <p className="text-gray-600 text-sm">
-                  Consider itemizing deductions if they exceed the standard deduction amount.
-                </p>
-              </div>
-              
-              <div className="border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-2">Tax-Efficient Investing</h4>
-                <p className="text-gray-600 text-sm">
-                  Utilize tax-advantaged accounts and consider tax-loss harvesting strategies.
-                </p>
+        {/* Executive Summary */}
+        <div className="bg-white shadow rounded-lg mb-6">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">Executive Summary</h2>
+          </div>
+          <div className="px-6 py-4">
+            {/* Tax Impact Display */}
+            <div className="bg-gradient-to-r from-red-50 to-green-50 border border-gray-200 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Your Tax Impact Analysis</h3>
+              <div className="space-y-4">
+                {/* Without tax cuts */}
+                <div className="bg-red-100 border-l-4 border-red-500 p-4 rounded-r-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-red-800 font-medium">Without tax cuts, you would have paid:</span>
+                    <span className="text-2xl font-bold text-red-900">${taxBeforeCuts.toLocaleString()}</span>
+                  </div>
+                </div>
+                
+                {/* With tax cuts */}
+                <div className="bg-blue-100 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-800 font-medium">With tax cuts, you only paid:</span>
+                    <span className="text-2xl font-bold text-blue-900">${taxAfterCuts.toLocaleString()}</span>
+                  </div>
+                </div>
+                
+                {/* Savings message */}
+                <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded-r-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-800 font-medium">🎉 You have earned $Z from your tax cuts this year!</span>
+                    <span className="text-2xl font-bold text-green-900">${taxCutSavings.toLocaleString()}</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Action Items */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recommended Actions</h3>
-            <div className="space-y-3">
-              <div className="flex items-center text-sm">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                Review and maximize retirement contributions
-              </div>
-              <div className="flex items-center text-sm">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                Gather documentation for itemized deductions
-              </div>
-              <div className="flex items-center text-sm">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                Consider tax-loss harvesting opportunities
-              </div>
-              <div className="flex items-center text-sm">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
-                Plan quarterly estimated tax payments
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-4 justify-center">
-            <button
-              onClick={handlePrint}
-              className="btn-secondary"
-            >
-              <Printer className="w-4 h-4 mr-2" />
-              Print Report
-            </button>
-            
-            <button
-              onClick={handleDownload}
-              disabled={downloading}
-              className="btn-primary"
-            >
-              {downloading ? (
+            {/* Additional Metrics */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Generating PDF...
+                  <DollarSign className="h-8 w-8 text-blue-600" />
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-blue-600">Total Taxable Income</p>
+                    <p className="text-2xl font-bold text-blue-900">${totalTaxableIncome.toLocaleString()}</p>
+                  </div>
                 </div>
-              ) : (
-                <>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Download Report
-                </>
-              )}
-            </button>
-            
-            <button
-              onClick={onReset}
-              className="btn-warning"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Start New Analysis
-            </button>
-          </div>
-
-          {/* Download Error */}
-          {downloadError && (
-            <div className="mt-4 p-3 bg-danger-50 border border-danger-200 rounded-lg">
-              <p className="text-danger-700 text-sm text-center">
-                {downloadError}
-              </p>
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="flex items-center">
+                  <Calculator className="h-8 w-8 text-green-600" />
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-green-600">Final Tax Owed</p>
+                    <p className="text-2xl font-bold text-green-900">${taxAfterCuts.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <div className="flex items-center">
+                  <TrendingUp className="h-8 w-8 text-purple-600" />
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-purple-600">Effective Tax Rate</p>
+                    <p className="text-2xl font-bold text-purple-900">{effectiveRate.toFixed(1)}%</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
-      </div>
 
-      {/* Disclaimer */}
-      <div className="mt-6 text-center">
-        <p className="text-xs text-gray-500">
-          This analysis is for informational purposes only and should not be considered as tax advice. 
-          Please consult with a qualified tax professional for specific guidance.
-        </p>
+        {/* Financial Breakdown */}
+        <div className="bg-white shadow rounded-lg mb-6">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">Financial Breakdown</h2>
+          </div>
+          <div className="px-6 py-4">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {/* Personal Finances */}
+              <div>
+                <h3 className="text-md font-medium text-gray-900 mb-4">Personal Finances</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Annual Income:</span>
+                    <span className="font-medium">${personalFinances.annual_income.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Other Income:</span>
+                    <span className="font-medium">${personalFinances.other_income.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Deductions:</span>
+                    <span className="font-medium">-${personalFinances.deductions.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Credits:</span>
+                    <span className="font-medium">-${personalFinances.credits.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="font-semibold text-gray-900">Taxable Income:</span>
+                    <span className="font-semibold">${personalTaxableIncome.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Business Finances */}
+              {businessFinances && (
+                <div>
+                  <h3 className="text-md font-medium text-gray-900 mb-4">Business Finances</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Business Name:</span>
+                      <span className="font-medium">{businessFinances.business_name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Annual Revenue:</span>
+                      <span className="font-medium">${businessFinances.annual_revenue.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Business Expenses:</span>
+                      <span className="font-medium">-${businessFinances.business_expenses.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-2">
+                      <span className="font-semibold text-gray-900">Net Income:</span>
+                      <span className="font-semibold">${businessNetIncome.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Tax Optimization Recommendations */}
+        <div className="bg-white shadow rounded-lg mb-6">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">Tax Optimization Recommendations</h2>
+          </div>
+          <div className="px-6 py-4">
+            <div className="space-y-6">
+              {recommendations.map((category, index) => (
+                <div key={index}>
+                  <h3 className="text-md font-medium text-gray-900 mb-3">{category.category}</h3>
+                  <ul className="space-y-2">
+                    {category.items.map((item, itemIndex) => (
+                      <li key={itemIndex} className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Next Steps */}
+        <div className="bg-white shadow rounded-lg mb-6">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">Next Steps</h2>
+          </div>
+          <div className="px-6 py-4">
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold text-sm">1</span>
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-gray-700">
+                    <strong>Review your tax documents</strong> - Gather all necessary tax forms and receipts
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold text-sm">2</span>
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-gray-700">
+                    <strong>Implement recommendations</strong> - Start with the highest-impact tax optimization strategies
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold text-sm">3</span>
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-gray-700">
+                    <strong>Consult with a tax professional</strong> - Consider professional advice for complex situations
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center text-sm text-gray-500 mb-8">
+          <p>This report is generated by Zin - Tax Analysis Platform</p>
+          <p>For questions or support, please contact our team</p>
+        </div>
       </div>
     </div>
-  );
+  )
 }
