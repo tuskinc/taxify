@@ -109,10 +109,10 @@ export default function Dashboard({
                 <p className="text-sm text-gray-600">Welcome back, {userProfile?.email}</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center" style={{ gap: 12 }}>
               <button
                 onClick={onStartNewAnalysis}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="btn btn-primary"
               >
                 <Calculator className="h-4 w-4 mr-2" />
                 New Analysis
@@ -124,9 +124,9 @@ export default function Dashboard({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Financial Overview */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16px mb-32px">
+          <div className="card overflow-hidden">
+            <div className="card-body">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <DollarSign className="h-8 w-8 text-blue-600" />
@@ -141,8 +141,8 @@ export default function Dashboard({
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+          <div className="card overflow-hidden">
+            <div className="card-body">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Users className="h-8 w-8 text-green-600" />
@@ -158,8 +158,8 @@ export default function Dashboard({
           </div>
 
           {businessFinances && (
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
+            <div className="card overflow-hidden">
+              <div className="card-body">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
                     <Building2 className="h-8 w-8 text-purple-600" />
@@ -175,8 +175,8 @@ export default function Dashboard({
             </div>
           )}
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+          <div className="card overflow-hidden">
+            <div className="card-body">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <BarChart3 className="h-8 w-8 text-orange-600" />
@@ -194,21 +194,21 @@ export default function Dashboard({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-24px lg:grid-cols-2">
           {/* Quick Actions */}
-          <div className="bg-white shadow rounded-lg">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Quick Actions</h2>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-16px sm:grid-cols-2">
                 {quickActions.map((action, index) => {
                   const Icon = action.icon
                   return (
                     <button
                       key={index}
                       onClick={action.action}
-                      className={`${action.color} text-white p-4 rounded-lg text-left transition-colors duration-200`}
+                      className={`${action.color} text-white p-4 rounded-lg text-left transition-colors duration-200 min-h-9`}
                     >
                       <div className="flex items-center">
                         <Icon className="h-6 w-6 mr-3" />
@@ -225,7 +225,7 @@ export default function Dashboard({
           </div>
 
           {/* Recent Analyses */}
-          <div className="bg-white shadow rounded-lg">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Recent Analyses</h2>
             </div>
@@ -248,7 +248,7 @@ export default function Dashboard({
         </div>
 
         {/* Upcoming Deadlines */}
-        <div className="mt-8 bg-white shadow rounded-lg">
+        <div className="mt-24px card">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">Upcoming Tax Deadlines</h2>
           </div>
@@ -277,7 +277,7 @@ export default function Dashboard({
         </div>
 
         {/* Tax Tips */}
-        <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 shadow rounded-lg">
+        <div className="mt-24px bg-gradient-to-r from-blue-50 to-indigo-50 shadow rounded-lg">
           <div className="px-6 py-4 border-b border-blue-200">
             <h2 className="text-lg font-medium text-gray-900">Tax Tips for You</h2>
           </div>

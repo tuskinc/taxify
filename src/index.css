@@ -19,3 +19,57 @@ body {
   color: var(--text);
   background: var(--bg);
 }
+
+@layer components {
+  /* Facebook-style button system */
+  .btn {
+    @apply inline-flex items-center justify-center min-h-9 px-4 py-3 rounded-md font-semibold transition ease-linear duration-200 select-none;
+  }
+
+  .btn-primary {
+    background-color: #1877f2;
+    color: #ffffff;
+  }
+  .btn-primary:hover { background-color: #166fe0; }
+  .btn-primary:active { background-color: #145fc3; }
+
+  .btn-secondary {
+    background-color: #e4e6ea;
+    color: #1c1e21;
+  }
+  .btn-secondary:hover { background-color: #eef0f3; }
+  .btn-secondary:active { background-color: #bfc3cb; }
+
+  .btn-danger {
+    background-color: #e41e3f;
+    color: #ffffff;
+  }
+  .btn-danger:hover { background-color: #cd1b39; }
+  .btn-danger:active { background-color: #b31831; }
+
+  .btn-ghost {
+    background-color: transparent;
+    color: #1877f2;
+    border: 1px solid #1877f2;
+  }
+  .btn-ghost:hover { background-color: rgba(24,119,242,0.06); }
+  .btn-ghost:active { background-color: rgba(24,119,242,0.12); }
+
+  /* Cards */
+  .card { @apply bg-white rounded-lg shadow; }
+  .card-body { padding: 20px; }
+
+  /* Spacing utilities (selected per spec) */
+  .gap-16px { gap: 16px; }
+  .gap-20px { gap: 20px; }
+  .gap-24px { gap: 24px; }
+  .mt-20px { margin-top: 20px; }
+  .mb-20px { margin-bottom: 20px; }
+  .mb-24px { margin-bottom: 24px; }
+  .mb-32px { margin-bottom: 32px; }
+  .p-20px { padding: 20px; }
+  .px-page { padding-left: 24px; padding-right: 24px; }
+  @media (max-width: 640px) {
+    .px-page { padding-left: 16px; padding-right: 16px; }
+  }
+}
