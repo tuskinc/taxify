@@ -8,6 +8,7 @@ import BusinessFinanceForm from './components/BusinessFinanceForm'
 import ComprehensiveAnalysisReport from './components/ComprehensiveAnalysisReport'
 import Dashboard from './components/Dashboard'
 import DocumentUpload from './components/DocumentUpload'
+import LandingPage from './components/LandingPage'
 
 export interface UserProfile {
   id: string
@@ -46,12 +47,12 @@ export interface BusinessFinances {
 
 export type TaxScenario = 'personal' | 'business' | 'combined'
 
-type Step = 'auth' | 'profile' | 'scenario' | 'personal' | 'business' | 'analysis' | 'dashboard' | 'upload'
+type Step = 'landing' | 'auth' | 'profile' | 'scenario' | 'personal' | 'business' | 'analysis' | 'dashboard' | 'upload'
 
 function App() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [currentStep, setCurrentStep] = useState<Step>('auth')
+  const [currentStep, setCurrentStep] = useState<Step>('landing')
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [personalFinances, setPersonalFinances] = useState<PersonalFinances | null>(null)
   const [businessFinances, setBusinessFinances] = useState<BusinessFinances | null>(null)
@@ -73,7 +74,7 @@ function App() {
         if (session?.user) {
           await checkUserProfile(session.user.id)
         } else {
-          setCurrentStep('auth')
+          setCurrentStep('landing')
           setUserProfile(null)
           setPersonalFinances(null)
           setBusinessFinances(null)
@@ -190,7 +191,10 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#fdf9f6]">
+      {currentStep === 'landing' && (
+        <LandingPage onGetStarted={() => setCurrentStep('auth')} />
+      )}
       {currentStep === 'auth' && (
         <AuthWrapper onAuthSuccess={() => checkUserProfile(user?.id)} />
       )}
