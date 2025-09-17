@@ -142,22 +142,22 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="w-full max-w-2xl mx-auto p-24px bg-white rounded-lg shadow-md">
       <div 
         {...getRootProps()} 
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-lg p-24px text-center cursor-pointer transition-colors ${
           isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400'
         } ${isUploading ? 'opacity-70 cursor-not-allowed' : ''}`}
       >
         <input {...getInputProps()} />
-        <div className="space-y-4">
+        <div className="space-y-16px">
           <div className="mx-auto w-12 h-12 text-blue-500">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
           </div>
           {isUploading ? (
-            <div className="space-y-2">
+            <div className="space-y-8px">
               <p className="font-medium">Processing {fileName}...</p>
               <div className={styles.progressBar}>
                 <div 
@@ -172,17 +172,17 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
               <h3 className="text-lg font-medium text-gray-900">
                 {isDragActive ? 'Drop the file here' : 'Upload financial documents'}
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 mt-8px">
                 Drag & drop your PDF, DOCX, XLSX, or CSV file here, or click to select
               </p>
-              <p className="text-xs text-gray-400 mt-2">
+              <p className="text-xs text-gray-400 mt-8px">
                 Supported formats: .pdf, .docx, .xlsx, .csv (Max 10MB)
               </p>
             </>
           )}
         </div>
       </div>
-      <div className="mt-16px flex" style={{ gap: 12 }}>
+      <div className="mt-16px btn-row">
         <button className="btn btn-secondary flex-1" type="button" onClick={() => setExtractedData(null)}>
           Clear
         </button>

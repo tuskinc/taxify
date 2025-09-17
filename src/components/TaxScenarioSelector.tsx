@@ -89,14 +89,14 @@ export default function TaxScenarioSelector({ userProfile, onComplete }: TaxScen
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
+        <div className="text-center mb-24px">
           <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-xl">Z</span>
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-24px text-3xl font-extrabold text-gray-900">
             Choose Your Tax Analysis
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-8px text-sm text-gray-600">
             Select the type of tax analysis you'd like to perform
           </p>
         </div>
@@ -108,7 +108,7 @@ export default function TaxScenarioSelector({ userProfile, onComplete }: TaxScen
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-16px md:grid-cols-3">
           {scenarios.map((scenario) => {
             const Icon = scenario.icon
             const isSelected = selectedScenarios.includes(scenario.id)
@@ -116,7 +116,7 @@ export default function TaxScenarioSelector({ userProfile, onComplete }: TaxScen
             return (
               <div
                 key={scenario.id}
-                className={`relative cursor-pointer rounded-lg border-2 p-6 transition-all duration-200 ${
+                className={`relative cursor-pointer rounded-lg border-2 p-24px transition-all duration-200 ${
                   isSelected
                     ? 'border-blue-500 bg-blue-50 shadow-lg'
                     : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
@@ -124,7 +124,7 @@ export default function TaxScenarioSelector({ userProfile, onComplete }: TaxScen
                 onClick={() => handleScenarioToggle(scenario.id)}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center gap-12px">
                     <div className={`p-2 rounded-lg ${
                       isSelected ? 'bg-blue-100' : 'bg-gray-100'
                     }`}>
@@ -136,7 +136,7 @@ export default function TaxScenarioSelector({ userProfile, onComplete }: TaxScen
                       <h3 className="text-lg font-semibold text-gray-900">
                         {scenario.title}
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 mt-4px">
                         {scenario.description}
                       </p>
                     </div>
@@ -152,8 +152,8 @@ export default function TaxScenarioSelector({ userProfile, onComplete }: TaxScen
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <ul className="space-y-2">
+                <div className="mt-16px">
+                  <ul className="space-y-8px">
                     {scenario.features.map((feature, index) => (
                       <li key={index} className="flex items-center text-sm text-gray-600">
                         <div className={`w-1.5 h-1.5 rounded-full mr-2 ${

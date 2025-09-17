@@ -6,23 +6,23 @@ interface HeroProps {
 
 export default function Hero({ onGetStarted }: HeroProps) {
   return (
-    <section id="home" className="bg-[#fdf9f6]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 grid md:grid-cols-2 gap-10 items-center">
+    <section id="home" className="section section-light">
+      <div className="page-container grid md:grid-cols-2 gap-24px items-center">
         <div>
           <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-[#111827]">
             Personalized tax planning built for you
           </h1>
-          <p className="mt-4 text-[#111827]/70 text-lg">
+          <p className="mt-8px text-[#111827]/70 text-lg">
             Ziam helps individuals and businesses explore, connect, and get support with data-backed tax strategies.
           </p>
-          <div className="mt-8 flex items-center space-x-4">
+          <div className="mt-24px btn-group">
             <button
               onClick={onGetStarted}
-              className="rounded-full bg-[#2563eb] text-white px-6 py-3 font-semibold hover:bg-blue-700 transition-colors"
+              className="btn btn-primary btn-pill"
             >
               Get Started
             </button>
-            <a href="#services" className="text-[#2563eb] font-medium hover:underline">Learn more</a>
+            <a href="#services" className="btn btn-ghost btn-pill">Learn more</a>
           </div>
         </div>
         <div className="relative">
