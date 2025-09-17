@@ -182,6 +182,14 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
           )}
         </div>
       </div>
+      <div className="mt-16px flex" style={{ gap: 12 }}>
+        <button className="btn btn-secondary flex-1" type="button" onClick={() => setExtractedData(null)}>
+          Clear
+        </button>
+        <button className="btn btn-primary flex-1" type="button" onClick={() => {}}>
+          Continue
+        </button>
+      </div>
     </div>
   );
 }
