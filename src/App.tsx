@@ -92,13 +92,9 @@ function App() {
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
 
-      if (error) {
-        console.error('Error fetching user profile:', error)
-        setCurrentStep('profile')
-        return
-      }
+      if (error) throw error
 
       if (profile) {
         setUserProfile(profile)
@@ -134,6 +130,7 @@ function App() {
           setCurrentStep('scenario')
         }
       } else {
+        // No profile row yet → collect profile
         setCurrentStep('profile')
       }
     } catch (error) {
@@ -196,7 +193,16 @@ function App() {
         <LandingPage onGetStarted={() => setCurrentStep('auth')} />
       )}
       {currentStep === 'auth' && (
-        <AuthWrapper onAuthSuccess={() => checkUserProfile(user?.id)} />
+        <AuthWrapper onAuthSuccess={async () => {
+          const { data } = await supabase.auth.getUser()
+          const uid = data.user?.id
+          if (uid) {
+            await checkUserProfile(uid)
+          } else {
+            // If still no user, stay on auth
+            setCurrentStep('auth')
+          }
+        }} />
       )}
       
       {currentStep === 'profile' && user && (

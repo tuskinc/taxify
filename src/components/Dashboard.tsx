@@ -98,7 +98,7 @@ export default function Dashboard({
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="page-container">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <div className="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center">
@@ -109,7 +109,7 @@ export default function Dashboard({
                 <p className="text-sm text-gray-600">Welcome back, {userProfile?.email}</p>
               </div>
             </div>
-            <div className="flex items-center" style={{ gap: 12 }}>
+            <div className="flex items-center btn-row">
               <button
                 onClick={onStartNewAnalysis}
                 className="btn btn-primary"
@@ -122,7 +122,7 @@ export default function Dashboard({
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-container py-24px">
         {/* Financial Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16px mb-32px">
           <div className="card overflow-hidden">
@@ -208,7 +208,7 @@ export default function Dashboard({
                     <button
                       key={index}
                       onClick={action.action}
-                      className={`${action.color} text-white p-4 rounded-lg text-left transition-colors duration-200 min-h-9`}
+                      className={`${action.color} text-white p-4 rounded-lg text-left min-h-9`}
                     >
                       <div className="flex items-center">
                         <Icon className="h-6 w-6 mr-3" />

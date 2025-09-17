@@ -118,15 +118,15 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
             <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-xl">Z</span>
             </div>
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-24px text-3xl font-extrabold text-gray-900">
               Review Your Business Information
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-8px text-sm text-gray-600">
               Please verify your business information before proceeding
             </p>
           </div>
 
-          <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+          <div className="bg-white p-24px shadow rounded-lg">
             {error && (
               <div className="mb-6 flex items-center space-x-2 text-red-600 text-sm">
                 <AlertCircle className="h-4 w-4" />
@@ -134,9 +134,9 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
               </div>
             )}
 
-            <div className="space-y-6">
+            <div className="space-y-24px">
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Business Details</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-16px">Business Details</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Business Name:</span>
@@ -151,9 +151,9 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-24px sm:grid-cols-2">
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Financial Summary</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-16px">Financial Summary</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Annual Revenue:</span>
@@ -202,7 +202,7 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
                 </p>
               </div>
 
-              <div className="flex" style={{ gap: 12 }}>
+              <div className="btn-row">
                 <button
                   onClick={handleBack}
                   className="flex-1 btn btn-secondary"
@@ -235,16 +235,16 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
           <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-xl">Z</span>
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-24px text-3xl font-extrabold text-gray-900">
             Business Financial Information
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-8px text-sm text-gray-600">
             Enter your business financial details for tax analysis
           </p>
         </div>
 
-        <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="bg-white p-24px shadow rounded-lg">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-24px">
             {error && (
               <div className="flex items-center space-x-2 text-red-600 text-sm">
                 <AlertCircle className="h-4 w-4" />
@@ -252,19 +252,19 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-16px sm:grid-cols-2">
               <div>
                 <label htmlFor="business_name" className="block text-sm font-medium text-gray-700">
                   Business Name
                 </label>
-                <div className="mt-1 relative">
+                <div className="mt-8px relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Building2 className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     {...register('business_name')}
                     type="text"
-                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 min-h-9 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="Enter business name"
                   />
                 </div>
@@ -277,13 +277,13 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
                 <label htmlFor="business_type" className="block text-sm font-medium text-gray-700">
                   Business Type
                 </label>
-                <div className="mt-1 relative">
+                <div className="mt-8px relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Building2 className="h-5 w-5 text-gray-400" />
                   </div>
                   <select
                     {...register('business_type')}
-                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 min-h-9 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   >
                     <option value="">Select business type</option>
                     {businessTypes.map((type) => (
@@ -299,12 +299,12 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-16px sm:grid-cols-2">
               <div>
                 <label htmlFor="annual_revenue" className="block text-sm font-medium text-gray-700">
                   Annual Revenue
                 </label>
-                <div className="mt-1 relative">
+                <div className="mt-8px relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <DollarSign className="h-5 w-5 text-gray-400" />
                   </div>
@@ -313,7 +313,7 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
                     type="number"
                     min="0"
                     step="0.01"
-                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 min-h-9 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="0.00"
                   />
                 </div>
@@ -326,7 +326,7 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
                 <label htmlFor="business_expenses" className="block text-sm font-medium text-gray-700">
                   Business Expenses
                 </label>
-                <div className="mt-1 relative">
+                <div className="mt-8px relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Calculator className="h-5 w-5 text-gray-400" />
                   </div>
@@ -335,7 +335,7 @@ export default function BusinessFinanceForm({ userProfile, onComplete }: Busines
                     type="number"
                     min="0"
                     step="0.01"
-                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 min-h-9 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="0.00"
                   />
                 </div>

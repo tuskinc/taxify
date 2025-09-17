@@ -68,26 +68,26 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="auth-card w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-xl">Z</span>
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-24px text-3xl font-extrabold text-gray-900">
             Welcome to Zin
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-8px text-sm text-gray-600">
             {isLogin ? 'Sign in to your account' : 'Create your account'}
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleAuth}>
-          <div className="space-y-4">
+        <form className="mt-24px space-y-24px" onSubmit={handleAuth}>
+          <div className="space-y-16px">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
               </label>
-              <div className="mt-1 relative">
+              <div className="mt-8px relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
@@ -99,7 +99,7 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full pl-10 pr-3 py-2 min-h-9 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Enter your email"
                 />
               </div>
@@ -109,7 +109,7 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
-              <div className="mt-1 relative">
+              <div className="mt-8px relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
@@ -121,7 +121,7 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none relative block w-full pl-10 pr-10 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full pl-10 pr-10 py-2 min-h-9 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Enter your password"
                 />
                 <button
@@ -143,7 +143,7 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                   Confirm Password
                 </label>
-                <div className="mt-1 relative">
+                <div className="mt-8px relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Lock className="h-5 w-5 text-gray-400" />
                   </div>
@@ -155,7 +155,7 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 min-h-9 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Confirm your password"
                   />
                 </div>
