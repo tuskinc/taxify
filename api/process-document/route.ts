@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { mapToZiamTaxModel } from '../../src/lib/mapping';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import pdf from 'pdf-parse';
 import ExcelJS from 'exceljs';
@@ -76,11 +77,15 @@ export async function POST(request: Request) {
 
     // 3. Extract financial data using Claude
     const extractedData = await extractFinancialData(textContent);
+    const mapped = mapToZiamTaxModel(extractedData as Record<string, unknown>, {
+      method: 'upload',
+      reference: fileName,
+    });
 
     // 4. Return the extracted data
     return NextResponse.json({ 
       success: true, 
-      data: extractedData 
+      data: mapped 
     });
 
   } catch (error) {

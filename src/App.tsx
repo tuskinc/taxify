@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import AuthWrapper from './components/AuthWrapper'
 import UserProfileSetup from './components/UserProfileSetup'
@@ -50,7 +51,7 @@ export type TaxScenario = 'personal' | 'business' | 'combined'
 type Step = 'landing' | 'auth' | 'profile' | 'scenario' | 'personal' | 'business' | 'analysis' | 'dashboard' | 'upload'
 
 function App() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentStep, setCurrentStep] = useState<Step>('landing')
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
@@ -62,8 +63,11 @@ function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       if (session?.user) {
-        checkUserProfile(session.user.id)
+        void checkUserProfile(session.user.id)
       }
+      setLoading(false)
+    }).catch((error) => {
+      console.error('Failed to get session', error)
       setLoading(false)
     })
 
