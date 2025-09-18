@@ -87,7 +87,7 @@ function App() {
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => { subscription.unsubscribe() }
   }, [])
 
   const checkUserProfile = async (userId: string) => {
@@ -194,7 +194,7 @@ function App() {
   return (
     <div className="min-h-screen bg-[#fdf9f6]">
       {currentStep === 'landing' && (
-        <LandingPage onGetStarted={() => setCurrentStep('auth')} />
+        <LandingPage onGetStarted={() => { setCurrentStep('auth') }} />
       )}
       {currentStep === 'auth' && (
         <AuthWrapper onAuthSuccess={async () => {
@@ -241,7 +241,7 @@ function App() {
         <DocumentUpload 
           user={user}
           onDataExtracted={handleDocumentUpload}
-          onBack={() => setCurrentStep('scenario')}
+          onBack={() => { setCurrentStep('scenario') }}
         />
       )}
       
@@ -262,8 +262,8 @@ function App() {
           userProfile={userProfile}
           personalFinances={personalFinances}
           businessFinances={businessFinances}
-          onStartNewAnalysis={() => setCurrentStep('analysis')}
-          onUploadDocuments={() => setCurrentStep('upload')}
+          onStartNewAnalysis={() => { setCurrentStep('analysis') }}
+          onUploadDocuments={() => { setCurrentStep('upload') }}
         />
       )}
     </div>
