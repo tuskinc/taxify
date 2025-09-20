@@ -8,7 +8,9 @@ import PersonalFinanceForm from './components/PersonalFinanceForm'
 import BusinessFinanceForm from './components/BusinessFinanceForm'
 import ComprehensiveAnalysisReport from './components/ComprehensiveAnalysisReport'
 import Dashboard from './components/Dashboard'
-import DocumentUpload from './components/DocumentUpload'
+import DocumentUploadPage from './components/DocumentUploadPage'
+import ReportPage from './components/ReportPage'
+import Onboarding from './components/Onboarding'
 import LandingPage from './components/LandingPage'
 
 export interface UserProfile {
@@ -48,7 +50,7 @@ export interface BusinessFinances {
 
 export type TaxScenario = 'personal' | 'business' | 'combined'
 
-type Step = 'landing' | 'auth' | 'profile' | 'scenario' | 'personal' | 'business' | 'analysis' | 'dashboard' | 'upload'
+type Step = 'landing' | 'onboarding' | 'auth' | 'profile' | 'scenario' | 'personal' | 'business' | 'analysis' | 'dashboard' | 'upload' | 'document_upload' | 'report'
 
 function App() {
   const [user, setUser] = useState<User | null>(null)
@@ -59,17 +61,33 @@ function App() {
   const [businessFinances, setBusinessFinances] = useState<BusinessFinances | null>(null)
 
   useEffect(() => {
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        void checkUserProfile(session.user.id)
+    console.log('App mounted')
+    // Check for existing session with a timeout fallback
+    let settled = false
+    const timeoutId = setTimeout(() => {
+      if (!settled) {
+        console.warn('getSession exceeded 5000ms; continuing without session')
+        setLoading(false)
       }
-      setLoading(false)
-    }).catch((error) => {
-      console.error('Failed to get session', error)
-      setLoading(false)
-    })
+    }, 5000)
+
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        settled = true
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          void checkUserProfile(session.user.id)
+        }
+        setLoading(false)
+      })
+      .catch((error: unknown) => {
+        settled = true
+        console.error('Failed to get session', error)
+        setLoading(false)
+      })
+      .finally(() => {
+        clearTimeout(timeoutId)
+      })
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -87,8 +105,20 @@ function App() {
       }
     )
 
-    return () => { subscription.unsubscribe() }
+    return () => { 
+      subscription.unsubscribe()
+    }
   }, [])
+
+  // Safety: never allow loading to persist forever
+  useEffect(() => {
+    if (!loading) return
+    const id = setTimeout(() => {
+      console.warn('Loading exceeded 6000ms; forcing UI render fallback')
+      setLoading(false)
+    }, 6000)
+    return () => { clearTimeout(id) }
+  }, [loading])
 
   const checkUserProfile = async (userId: string) => {
     try {
@@ -101,10 +131,26 @@ function App() {
       if (error) throw error
 
       if (profile) {
-        setUserProfile(profile)
+        const p = profile as Record<string, unknown>
+        const toStringOrEmpty = (v: unknown) => (typeof v === 'string' ? v : '')
+        const toNumberOrZero = (v: unknown) => (typeof v === 'number' ? v : 0)
+        const toStringArrayOrEmpty = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [])
+        const normalizedProfile: UserProfile = {
+          id: toStringOrEmpty(p.id),
+          email: toStringOrEmpty(p.email),
+          country: toStringOrEmpty(p.country) || 'US',
+          filing_status: toStringOrEmpty(p.filing_status) || 'single',
+          birth_date: toStringOrEmpty(p.birth_date),
+          dependents: toNumberOrZero(p.dependents),
+          spouse_income: toNumberOrZero(p.spouse_income),
+          tax_scenarios: toStringArrayOrEmpty(p.tax_scenarios),
+          created_at: toStringOrEmpty(p.created_at) || new Date().toISOString(),
+          updated_at: toStringOrEmpty(p.updated_at) || new Date().toISOString(),
+        }
+        setUserProfile(normalizedProfile)
         
         // Check if user has completed all steps
-        if (profile.tax_scenarios && profile.tax_scenarios.length > 0) {
+        if (profile.tax_scenarios && Array.isArray(profile.tax_scenarios) && profile.tax_scenarios.length > 0) {
           // Check for personal finances
           const { data: personalData } = await supabase
             .from('personal_finances')
@@ -123,7 +169,7 @@ function App() {
           }
 
           // Check for business finances if needed
-          if (profile.tax_scenarios.includes('business') || profile.tax_scenarios.includes('combined')) {
+          if (Array.isArray(profile.tax_scenarios) && (profile.tax_scenarios.includes('business') || profile.tax_scenarios.includes('combined'))) {
             const { data: businessData } = await supabase
               .from('business_finances')
               .select('*')
@@ -164,7 +210,7 @@ function App() {
 
   const handlePersonalComplete = (finances: PersonalFinances) => {
     setPersonalFinances(finances)
-    if (userProfile?.tax_scenarios?.includes('business') || userProfile?.tax_scenarios?.includes('combined')) {
+    if (userProfile && Array.isArray(userProfile.tax_scenarios) && (userProfile.tax_scenarios.includes('business') || userProfile.tax_scenarios.includes('combined'))) {
       setCurrentStep('business')
     } else {
       setCurrentStep('analysis')
@@ -184,11 +230,14 @@ function App() {
     setCurrentStep('dashboard')
   }
 
-  const handleDocumentUpload = (data: any) => {
-    // Process uploaded document data
-    console.log('Document data received:', data)
-    setCurrentStep('analysis')
+  const handleNavigateToUpload = () => {
+    setCurrentStep('document_upload')
   }
+
+  const handleNavigateToReport = () => {
+    setCurrentStep('report')
+  }
+
 
   if (loading) {
     return (
@@ -204,10 +253,49 @@ function App() {
   return (
     <div className="min-h-screen bg-[#fdf9f6]">
       {currentStep === 'landing' && (
-        <LandingPage onGetStarted={() => { setCurrentStep('auth') }} />
+        <LandingPage onGetStarted={() => { setCurrentStep('onboarding') }} />
+      )}
+      {currentStep === 'onboarding' && (
+        <Onboarding onAuthSuccess={() => {
+          const handleAuthSuccess = async () => {
+            const { data } = await supabase.auth.getUser()
+            const uid = data.user?.id
+            if (uid) {
+              await checkUserProfile(uid)
+            } else {
+              // If still no user, go to dashboard anyway for demo
+              setCurrentStep('dashboard')
+              // Create a mock user profile for demo
+              setUserProfile({
+                id: 'demo-user',
+                email: 'demo@taxify.com',
+                country: 'US',
+                filing_status: 'single',
+                birth_date: '1990-01-01',
+                dependents: 0,
+                spouse_income: 0,
+                tax_scenarios: ['personal'],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              setPersonalFinances({
+                id: 'demo-personal',
+                user_id: 'demo-user',
+                annual_income: 75000,
+                deductions: 12000,
+                credits: 2000,
+                other_income: 5000,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+            }
+          }
+          void handleAuthSuccess()
+        }} />
       )}
       {currentStep === 'auth' && (
-        <AuthWrapper onAuthSuccess={async () => {
+        <AuthWrapper onAuthSuccess={() => {
+          const handleAuthSuccess = async () => {
           const { data } = await supabase.auth.getUser()
           const uid = data.user?.id
           if (uid) {
@@ -216,6 +304,8 @@ function App() {
             // If still no user, stay on auth
             setCurrentStep('auth')
           }
+          }
+          void handleAuthSuccess()
         }} />
       )}
       
@@ -247,13 +337,6 @@ function App() {
         />
       )}
       
-      {currentStep === 'upload' && userProfile && (
-        <DocumentUpload 
-          user={user}
-          onDataExtracted={handleDocumentUpload}
-          onBack={() => { setCurrentStep('scenario') }}
-        />
-      )}
       
       {currentStep === 'analysis' && userProfile && personalFinances && (
         <ComprehensiveAnalysisReport 
@@ -273,7 +356,27 @@ function App() {
           personalFinances={personalFinances}
           businessFinances={businessFinances}
           onStartNewAnalysis={() => { setCurrentStep('analysis') }}
-          onUploadDocuments={() => { setCurrentStep('upload') }}
+          onUploadDocuments={handleNavigateToUpload}
+          onGenerateReport={handleNavigateToReport}
+        />
+      )}
+
+      {currentStep === 'document_upload' && userProfile && (
+        <DocumentUploadPage
+          onUploadComplete={(data) => {
+            console.log('Document upload completed:', data)
+            setCurrentStep('dashboard')
+          }}
+          onBackToDashboard={handleBackToDashboard}
+        />
+      )}
+
+      {currentStep === 'report' && userProfile && personalFinances && (
+        <ReportPage
+          userProfile={userProfile}
+          personalFinances={personalFinances}
+          businessFinances={businessFinances}
+          onBackToDashboard={handleBackToDashboard}
         />
       )}
     </div>

@@ -10,10 +10,10 @@ export default function Hero({ onGetStarted }: HeroProps) {
       <div className="page-container grid md:grid-cols-2 gap-24px items-center">
         <div>
           <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-[#111827]">
-            Personalized tax planning built for you
+            Taxify - Smart Tax Planning Made Simple
           </h1>
           <p className="mt-8px text-[#111827]/70 text-lg">
-            Ziam helps individuals and businesses explore, connect, and get support with data-backed tax strategies.
+            Upload your documents, connect your CRM, and get personalized tax insights with AI-powered analysis to maximize your savings.
           </p>
           <div className="mt-24px btn-group">
             <button

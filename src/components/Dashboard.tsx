@@ -1,19 +1,22 @@
-import { } from 'react'
 import { BarChart3, FileText, Calendar, TrendingUp, DollarSign, Building2, Users, Calculator } from 'lucide-react'
 
 interface DashboardProps {
-  user: any
+  user?: any
   userProfile: any
   personalFinances: any
   businessFinances?: any
   onStartNewAnalysis: () => void
+  onUploadDocuments: () => void
+  onGenerateReport: () => void
 }
 
 export default function Dashboard({ 
   userProfile, 
   personalFinances, 
   businessFinances, 
-  onStartNewAnalysis 
+  onStartNewAnalysis,
+  onUploadDocuments,
+  onGenerateReport
 }: DashboardProps) {
   const personalTaxableIncome = personalFinances 
     ? personalFinances.annual_income + personalFinances.other_income - personalFinances.deductions
@@ -27,31 +30,31 @@ export default function Dashboard({
 
   const quickActions = [
     {
-      title: 'New Tax Analysis',
-      description: 'Start a fresh tax analysis with updated information',
-      icon: Calculator,
-      action: onStartNewAnalysis,
+      title: 'Upload Documents',
+      description: 'Upload your financial documents for analysis',
+      icon: FileText,
+      action: onUploadDocuments,
       color: 'bg-blue-500 hover:bg-blue-600'
     },
     {
-      title: 'View Reports',
-      description: 'Access your previous tax analysis reports',
-      icon: FileText,
-      action: () => console.log('View reports'),
+      title: 'Connect CRM',
+      description: 'Connect your CRM system for automatic data sync',
+      icon: Building2,
+      action: () => { console.log('Navigate to CRM connection') },
       color: 'bg-green-500 hover:bg-green-600'
+    },
+    {
+      title: 'Generate Report',
+      description: 'Generate your personalized tax analysis report',
+      icon: BarChart3,
+      action: onGenerateReport,
+      color: 'bg-purple-500 hover:bg-purple-600'
     },
     {
       title: 'Tax Calendar',
       description: 'View important tax dates and deadlines',
       icon: Calendar,
-      action: () => console.log('View calendar'),
-      color: 'bg-purple-500 hover:bg-purple-600'
-    },
-    {
-      title: 'Tax Tips',
-      description: 'Get personalized tax optimization tips',
-      icon: TrendingUp,
-      action: () => console.log('View tips'),
+      action: () => { console.log('View calendar') },
       color: 'bg-orange-500 hover:bg-orange-600'
     }
   ]
@@ -102,20 +105,27 @@ export default function Dashboard({
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <div className="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">Z</span>
+                <span className="text-white font-bold text-lg">T</span>
               </div>
               <div className="ml-3">
-                <h1 className="text-2xl font-bold text-gray-900">Zin Dashboard</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Taxify Dashboard</h1>
                 <p className="text-sm text-gray-600">Welcome back, {userProfile?.email}</p>
               </div>
             </div>
-            <div className="flex items-center btn-row">
+            <div className="flex items-center btn-row space-x-3">
               <button
-                onClick={onStartNewAnalysis}
+                onClick={onUploadDocuments}
+                className="btn btn-ghost"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Upload Documents
+              </button>
+              <button
+                onClick={onGenerateReport}
                 className="btn btn-primary"
               >
                 <Calculator className="h-4 w-4 mr-2" />
-                New Analysis
+                Generate Report
               </button>
             </div>
           </div>
@@ -208,7 +218,7 @@ export default function Dashboard({
                     <button
                       key={index}
                       onClick={action.action}
-                      className={`${action.color} text-white p-4 rounded-lg text-left min-h-9`}
+                      className={`${action.color} text-white p-4 rounded-lg text-left min-h-[36px]`}
                     >
                       <div className="flex items-center">
                         <Icon className="h-6 w-6 mr-3" />

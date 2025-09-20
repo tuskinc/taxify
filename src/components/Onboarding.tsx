@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { User, Mail, Lock, Eye, EyeOff, AlertCircle, Building2 } from 'lucide-react'
 
-interface AuthWrapperProps {
+interface OnboardingProps {
   onAuthSuccess: () => void
 }
 
-export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
-  const [isLogin, setIsLogin] = useState(true)
+export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
+  const [isLogin, setIsLogin] = useState(false)
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -15,6 +16,7 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [skipCRM, setSkipCRM] = useState(false)
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,28 +68,58 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
     }
   }
 
+  const handleSkipToDashboard = () => {
+    // Only allow skipping in development
+    if (process.env.NODE_ENV === 'development') {
+      onAuthSuccess()
+    }
+  }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="auth-card w-full space-y-8">
+      <div className="auth-card w-full max-w-md space-y-8">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-xl">T</span>
           </div>
-          <h2 className="mt-24px text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
             Welcome to Taxify
           </h2>
-          <p className="mt-8px text-sm text-gray-600">
-            {isLogin ? 'Sign in to your account' : 'Create your account'}
+          <p className="mt-2 text-sm text-gray-600">
+            {isLogin ? 'Sign in to your account' : 'Create your account to get started'}
           </p>
         </div>
 
-        <form className="mt-24px space-y-24px" onSubmit={handleAuth}>
-          <div className="space-y-16px">
+        <form className="mt-8 space-y-6" onSubmit={handleAuth}>
+          <div className="space-y-4">
+            {!isLogin && (
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Full Name
+                </label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    autoComplete="name"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 min-h-[36px] border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
               </label>
-              <div className="mt-8px relative">
+              <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
@@ -109,7 +141,7 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
-              <div className="mt-8px relative">
+              <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
@@ -143,7 +175,7 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                   Confirm Password
                 </label>
-                <div className="mt-8px relative">
+                <div className="mt-1 relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Lock className="h-5 w-5 text-gray-400" />
                   </div>
@@ -177,7 +209,7 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
             </div>
           )}
 
-          <div className="mt-24px">
+          <div className="space-y-4">
             <button
               type="submit"
               disabled={loading}
@@ -189,9 +221,34 @@ export default function AuthWrapper({ onAuthSuccess }: AuthWrapperProps) {
                 isLogin ? 'Sign In' : 'Sign Up'
               )}
             </button>
+
+            <div className="flex items-center justify-center">
+              <div className="flex items-center">
+                <input
+                  id="skip-crm"
+                  name="skip-crm"
+                  type="checkbox"
+                  checked={skipCRM}
+                  onChange={(e) => setSkipCRM(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="skip-crm" className="ml-2 block text-sm text-gray-900">
+                  Connect CRM later
+                </label>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSkipToDashboard}
+              className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Building2 className="h-4 w-4 mr-2" />
+              Skip for now - Explore Dashboard
+            </button>
           </div>
 
-          <div className="flex items-center justify-between mt-16px">
+          <div className="flex items-center justify-between">
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
