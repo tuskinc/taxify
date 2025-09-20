@@ -113,7 +113,13 @@ function App() {
             .single()
 
           if (personalData) {
-            setPersonalFinances(personalData)
+            setPersonalFinances({
+              ...personalData,
+              annual_income: personalData.annual_income ?? 0,
+              deductions: personalData.deductions ?? 0,
+              credits: personalData.credits ?? 0,
+              other_income: personalData.other_income ?? 0,
+            } as PersonalFinances)
           }
 
           // Check for business finances if needed
@@ -125,7 +131,11 @@ function App() {
               .single()
 
             if (businessData) {
-              setBusinessFinances(businessData)
+              setBusinessFinances({
+                ...businessData,
+                annual_revenue: businessData.annual_revenue ?? 0,
+                business_expenses: businessData.business_expenses ?? 0,
+              } as BusinessFinances)
             }
           }
 
