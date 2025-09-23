@@ -91,7 +91,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $
 begin
   -- Only run for INSERT and UPDATE operations
   if TG_OP not in ('INSERT', 'UPDATE') then
@@ -100,18 +100,39 @@ begin
   
   -- Encrypt access_token if present
   if NEW.access_token is not null and NEW.access_token != '' then
-    NEW.access_token := public.encrypt_token(NEW.access_token);
+    -- Basic check: encrypted tokens should be base64 and longer than plaintext
+    -- This is a heuristic but helps prevent obvious double encryption
+    if length(NEW.access_token) < 100 or NEW.access_token !~ '^[A-Za-z0-9+/]*={0,2}
+-- Trigger to automatically encrypt tokens before INSERT or UPDATE
+create trigger crm_tokens_encrypt_trigger
+  before insert or update on public.crm_connections
+  for each row
+  execute function public.encrypt_crm_tokens();
+
+
+ then
+      NEW.access_token := public.encrypt_token(NEW.access_token);
+    end if;
   end if;
   
   -- Encrypt refresh_token if present
   if NEW.refresh_token is not null and NEW.refresh_token != '' then
-    NEW.refresh_token := public.encrypt_token(NEW.refresh_token);
+    if length(NEW.refresh_token) < 100 or NEW.refresh_token !~ '^[A-Za-z0-9+/]*={0,2}
+-- Trigger to automatically encrypt tokens before INSERT or UPDATE
+create trigger crm_tokens_encrypt_trigger
+  before insert or update on public.crm_connections
+  for each row
+  execute function public.encrypt_crm_tokens();
+
+
+ then
+      NEW.refresh_token := public.encrypt_token(NEW.refresh_token);
+    end if;
   end if;
   
   return NEW;
 end;
-$$;
-
+$;
 -- Trigger to automatically encrypt tokens before INSERT or UPDATE
 create trigger crm_tokens_encrypt_trigger
   before insert or update on public.crm_connections
