@@ -1,13 +1,40 @@
-import { BarChart3, FileText, Calendar, TrendingUp, DollarSign, Building2, Users, Calculator } from 'lucide-react'
+import { BarChart3, FileText, Calendar, TrendingUp, DollarSign, Building2, Users, Calculator, Play } from 'lucide-react'
+import type { User } from '@supabase/supabase-js'
+
+type TaxScenarioId = 'personal' | 'business' | 'combined'
+interface TaxScenario { id: TaxScenarioId; name: string; description: string }
+
+interface PersonalFinance {
+  annual_income?: number
+  other_income?: number
+  deductions?: number
+  credits?: number
+}
+
+interface BusinessFinance {
+  annual_revenue?: number
+  business_expenses?: number
+}
+
+interface UserProfile {
+  id?: string
+  email?: string
+  country?: string
+  filing_status?: string
+  birth_date?: string
+  dependents?: number
+  spouse_income?: number
+  tax_scenarios?: TaxScenario[]
+}
 
 interface DashboardProps {
-  user?: any
-  userProfile: any
-  personalFinances: any
-  businessFinances?: any
-  onStartNewAnalysis: () => void
-  onUploadDocuments: () => void
-  onGenerateReport: () => void
+  user?: User | null
+  userProfile?: UserProfile | null
+  personalFinances?: PersonalFinance | null
+  businessFinances?: BusinessFinance | null
+  onStartNewAnalysis?: () => void
+  onUploadDocuments?: () => void
+  onGenerateReport?: () => void
 }
 
 export default function Dashboard({ 
@@ -18,15 +45,11 @@ export default function Dashboard({
   onUploadDocuments,
   onGenerateReport
 }: DashboardProps) {
-  const personalTaxableIncome = personalFinances 
-    ? personalFinances.annual_income + personalFinances.other_income - personalFinances.deductions
-    : 0
+  const personalTaxableIncome: number = (personalFinances?.annual_income ?? 0) + (personalFinances?.other_income ?? 0) - (personalFinances?.deductions ?? 0)
 
-  const businessNetIncome = businessFinances 
-    ? businessFinances.annual_revenue - businessFinances.business_expenses 
-    : 0
+  const businessNetIncome: number = (businessFinances?.annual_revenue ?? 0) - (businessFinances?.business_expenses ?? 0)
 
-  const totalTaxableIncome = personalTaxableIncome + businessNetIncome
+  const totalTaxableIncome: number = personalTaxableIncome + businessNetIncome
 
   const quickActions = [
     {
@@ -47,7 +70,7 @@ export default function Dashboard({
       title: 'Generate Report',
       description: 'Generate your personalized tax analysis report',
       icon: BarChart3,
-      action: onGenerateReport,
+      action: onGenerateReport ?? (() => { /* no-op */ }),
       color: 'bg-purple-500 hover:bg-purple-600'
     },
     {
@@ -109,7 +132,7 @@ export default function Dashboard({
               </div>
               <div className="ml-3">
                 <h1 className="text-2xl font-bold text-gray-900">Taxify Dashboard</h1>
-                <p className="text-sm text-gray-600">Welcome back, {userProfile?.email}</p>
+                <p className="text-sm text-gray-600">Welcome back, {userProfile?.email ?? 'Guest'}</p>
               </div>
             </div>
             <div className="flex items-center btn-row space-x-3">
@@ -127,6 +150,15 @@ export default function Dashboard({
                 <Calculator className="h-4 w-4 mr-2" />
                 Generate Report
               </button>
+              {onStartNewAnalysis && (
+                <button
+                  onClick={onStartNewAnalysis}
+                  className="btn btn-ghost"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Start New Analysis
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -167,7 +199,7 @@ export default function Dashboard({
             </div>
           </div>
 
-          {businessFinances && (
+          {(businessFinances?.annual_revenue ?? 0) > 0 && (
             <div className="card overflow-hidden">
               <div className="card-body">
                 <div className="flex items-center">
@@ -195,7 +227,7 @@ export default function Dashboard({
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Tax Scenarios</dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      {userProfile?.tax_scenarios?.length || 0}
+                      {userProfile?.tax_scenarios?.length ?? 0}
                     </dd>
                   </dl>
                 </div>

@@ -3,7 +3,7 @@ import { FileText, Download, Mail, ArrowLeft, CheckCircle, DollarSign, TrendingU
 
 
 interface UserProfile {
-  filing_status: 'single' | 'married_filing_jointly' | 'married_filing_separately' | 'head_of_household'
+  filing_status: string
   dependents: number
   // add other profile fields
 }
@@ -37,7 +37,7 @@ interface ReportData {
 interface ReportPageProps {
   userProfile: UserProfile
   personalFinances: PersonalFinances
-  businessFinances: BusinessFinances
+  businessFinances?: BusinessFinances | null
   onBackToDashboard: () => void
 }
 
@@ -59,7 +59,7 @@ export default function ReportPage({
       // Calculate tax information
       const personalTaxableIncome = personalFinances.annual_income + personalFinances.other_income - personalFinances.deductions
 
-      const businessNetIncome = businessFinances.annual_revenue - businessFinances.business_expenses
+      const businessNetIncome = (businessFinances?.annual_revenue ?? 0) - (businessFinances?.business_expenses ?? 0)
 
       const totalTaxableIncome = personalTaxableIncome + businessNetIncome
 
@@ -117,7 +117,7 @@ You saved $${reportData.moneySaved.toLocaleString()} from tax cuts. Without them
 
 Personal Information:
 - Filing Status: ${reportData.filingStatus}
-- Dependents: ${reportData.dependents}
+- Dependents: ${reportData.dependents.toString()}
 
 This report was generated using AI-powered tax analysis to help optimize your tax strategy.
       `.trim()
@@ -313,7 +313,7 @@ This report was generated using AI-powered tax analysis to help optimize your ta
                   <span className="text-gray-600">Personal Income</span>
                   <span className="font-medium">${reportData.personalIncome.toLocaleString()}</span>
                 </div>
-                {businessFinances.annual_revenue > 0 && (
+                {(businessFinances?.annual_revenue ?? 0) > 0 && (
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
                     <span className="text-gray-600">Business Income</span>
                     <span className="font-medium">${reportData.businessIncome.toLocaleString()}</span>

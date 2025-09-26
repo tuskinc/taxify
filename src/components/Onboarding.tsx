@@ -6,6 +6,10 @@ interface OnboardingProps {
   onAuthSuccess: () => void
 }
 
+interface ErrorLike {
+  message: string
+}
+
 export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
   const [isLogin, setIsLogin] = useState(false)
   const [name, setName] = useState('')
@@ -18,7 +22,7 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
   const [error, setError] = useState('')
   const [skipCRM, setSkipCRM] = useState(false)
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -46,8 +50,9 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
         if (error) throw error
         setMessage('Check your email for the confirmation link!')
       }
-    } catch (error: any) {
-      setError(error.message)
+    } catch (err: unknown) {
+      const e = err as Partial<ErrorLike>
+      setError(typeof e.message === 'string' ? e.message : 'An unexpected error occurred')
     } finally {
       setLoading(false)
     }
@@ -63,8 +68,9 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
       const { error } = await supabase.auth.resetPasswordForEmail(email)
       if (error) throw error
       setMessage('Password reset email sent!')
-    } catch (error: any) {
-      setError(error.message)
+    } catch (err: unknown) {
+      const e = err as Partial<ErrorLike>
+      setError(typeof e.message === 'string' ? e.message : 'An unexpected error occurred')
     }
   }
 
@@ -89,7 +95,7 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleAuth}>
+        <form className="mt-8 space-y-6" onSubmit={(e) => { void handleAuth(e) }}>
           <div className="space-y-4">
             {!isLogin && (
               <div>
@@ -107,7 +113,7 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
                     autoComplete="name"
                     required
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setName(e.target.value) }}
                     className="appearance-none relative block w-full pl-10 pr-3 py-2 min-h-[36px] border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Enter your full name"
                   />
@@ -130,7 +136,7 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setEmail(e.target.value) }}
                   className="appearance-none relative block w-full pl-10 pr-3 py-2 min-h-[36px] border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Enter your email"
                 />
@@ -152,14 +158,14 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
                   autoComplete={isLogin ? 'current-password' : 'new-password'}
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setPassword(e.target.value) }}
                   className="appearance-none relative block w-full pl-10 pr-10 py-2 min-h-[36px] border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => { setShowPassword(!showPassword) }}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400" />
@@ -186,7 +192,7 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
                     autoComplete="new-password"
                     required
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setConfirmPassword(e.target.value) }}
                     className="appearance-none relative block w-full pl-10 pr-3 py-2 min-h-[36px] border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Confirm your password"
                   />
@@ -229,7 +235,7 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
                   name="skip-crm"
                   type="checkbox"
                   checked={skipCRM}
-                  onChange={(e) => setSkipCRM(e.target.checked)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setSkipCRM(e.target.checked) }}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="skip-crm" className="ml-2 block text-sm text-gray-900">
@@ -240,7 +246,7 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
 
             <button
               type="button"
-              onClick={handleSkipToDashboard}
+              onClick={() => { handleSkipToDashboard() }}
               className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <Building2 className="h-4 w-4 mr-2" />
@@ -251,7 +257,7 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
           <div className="flex items-center justify-between">
             <button
               type="button"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => { setIsLogin(!isLogin) }}
               className="text-sm text-[#1877f2] hover:underline"
             >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
@@ -260,7 +266,7 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
             {isLogin && (
               <button
                 type="button"
-                onClick={handlePasswordReset}
+                onClick={() => { void handlePasswordReset() }}
                 className="text-sm text-[#1877f2] hover:underline"
               >
                 Forgot password?

@@ -21,7 +21,7 @@ export interface UserProfile {
   birth_date: string
   dependents: number
   spouse_income: number
-  tax_scenarios: string[]
+  tax_scenarios: TaxScenario[]
   created_at: string
   updated_at: string
 }
@@ -48,7 +48,31 @@ export interface BusinessFinances {
   updated_at: string
 }
 
-export type TaxScenario = 'personal' | 'business' | 'combined'
+export type TaxScenarioId = 'personal' | 'business' | 'combined'
+
+export interface TaxScenario {
+  id: TaxScenarioId
+  name: string
+  description: string
+}
+
+const SCENARIOS: Record<TaxScenarioId, TaxScenario> = {
+  personal: {
+    id: 'personal',
+    name: 'Personal & Family Taxes',
+    description: 'Analyze personal income, deductions, and family tax situation',
+  },
+  business: {
+    id: 'business',
+    name: 'Business Taxes',
+    description: 'Optimize business tax strategy and compliance',
+  },
+  combined: {
+    id: 'combined',
+    name: 'Combined Analysis',
+    description: 'Comprehensive analysis of both personal and business finances',
+  },
+}
 
 type Step = 'landing' | 'onboarding' | 'auth' | 'profile' | 'scenario' | 'personal' | 'business' | 'analysis' | 'dashboard' | 'upload' | 'document_upload' | 'report'
 
@@ -62,36 +86,42 @@ function App() {
 
   useEffect(() => {
     console.log('App mounted')
+    let isMounted = true
     // Check for existing session with a timeout fallback
     let settled = false
     const timeoutId = setTimeout(() => {
-      if (!settled) {
+      if (!settled && isMounted) {
         console.warn('getSession exceeded 5000ms; continuing without session')
         setLoading(false)
       }
     }, 5000)
 
-    supabase.auth.getSession()
-      .then(({ data: { session } }) => {
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
         settled = true
+        if (error) {
+          console.error('Failed to get session', error)
+        }
+        if (!isMounted) return
         setUser(session?.user ?? null)
         if (session?.user) {
-          void checkUserProfile(session.user.id)
+          await checkUserProfile(session.user.id)
         }
-        setLoading(false)
-      })
-      .catch((error: unknown) => {
+      } catch (error) {
         settled = true
         console.error('Failed to get session', error)
-        setLoading(false)
-      })
-      .finally(() => {
+      } finally {
+        if (isMounted) setLoading(false)
         clearTimeout(timeoutId)
-      })
+      }
+    }
+    void initSession()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!isMounted) return
         setUser(session?.user ?? null)
         if (session?.user) {
           await checkUserProfile(session.user.id)
@@ -106,7 +136,9 @@ function App() {
     )
 
     return () => { 
+      isMounted = false
       subscription.unsubscribe()
+      clearTimeout(timeoutId)
     }
   }, [])
 
@@ -134,7 +166,26 @@ function App() {
         const p = profile as Record<string, unknown>
         const toStringOrEmpty = (v: unknown) => (typeof v === 'string' ? v : '')
         const toNumberOrZero = (v: unknown) => (typeof v === 'number' ? v : 0)
-        const toStringArrayOrEmpty = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [])
+          const toScenarioArray = (v: unknown): TaxScenario[] => {
+            if (Array.isArray(v)) {
+              // Accept either array of ids or array of objects
+              const result: TaxScenario[] = []
+              for (const item of v) {
+                if (typeof item === 'string') {
+                  if (item in SCENARIOS) result.push(SCENARIOS[item as TaxScenarioId])
+                } else if (item && typeof item === 'object' && 'id' in item) {
+                  const obj = item as Partial<TaxScenario>
+                  const id = typeof obj.id === 'string' ? (obj.id as TaxScenarioId) : undefined
+                  if (id && (id in SCENARIOS)) {
+                    // merge with canonical to ensure required fields
+                    result.push({ ...SCENARIOS[id], ...obj })
+                  }
+                }
+              }
+              return result
+            }
+            return []
+          }
         const normalizedProfile: UserProfile = {
           id: toStringOrEmpty(p.id),
           email: toStringOrEmpty(p.email),
@@ -143,14 +194,14 @@ function App() {
           birth_date: toStringOrEmpty(p.birth_date),
           dependents: toNumberOrZero(p.dependents),
           spouse_income: toNumberOrZero(p.spouse_income),
-          tax_scenarios: toStringArrayOrEmpty(p.tax_scenarios),
+          tax_scenarios: toScenarioArray(p.tax_scenarios),
           created_at: toStringOrEmpty(p.created_at) || new Date().toISOString(),
           updated_at: toStringOrEmpty(p.updated_at) || new Date().toISOString(),
         }
         setUserProfile(normalizedProfile)
         
         // Check if user has completed all steps
-        if (profile.tax_scenarios && Array.isArray(profile.tax_scenarios) && profile.tax_scenarios.length > 0) {
+        if (normalizedProfile.tax_scenarios && Array.isArray(normalizedProfile.tax_scenarios) && normalizedProfile.tax_scenarios.length > 0) {
           // Check for personal finances
           const { data: personalData } = await supabase
             .from('personal_finances')
@@ -169,7 +220,7 @@ function App() {
           }
 
           // Check for business finances if needed
-          if (Array.isArray(profile.tax_scenarios) && (profile.tax_scenarios.includes('business') || profile.tax_scenarios.includes('combined'))) {
+          if (Array.isArray(normalizedProfile.tax_scenarios) && normalizedProfile.tax_scenarios.some((s) => s.id === 'business' || s.id === 'combined')) {
             const { data: businessData } = await supabase
               .from('business_finances')
               .select('*')
@@ -210,7 +261,7 @@ function App() {
 
   const handlePersonalComplete = (finances: PersonalFinances) => {
     setPersonalFinances(finances)
-    if (userProfile && Array.isArray(userProfile.tax_scenarios) && (userProfile.tax_scenarios.includes('business') || userProfile.tax_scenarios.includes('combined'))) {
+    if (userProfile && Array.isArray(userProfile.tax_scenarios) && userProfile.tax_scenarios.some(s => s.id === 'business' || s.id === 'combined')) {
       setCurrentStep('business')
     } else {
       setCurrentStep('analysis')
@@ -274,7 +325,7 @@ function App() {
                 birth_date: '1990-01-01',
                 dependents: 0,
                 spouse_income: 0,
-                tax_scenarios: ['personal'],
+                tax_scenarios: [SCENARIOS.personal],
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
               })
@@ -375,7 +426,7 @@ function App() {
         <ReportPage
           userProfile={userProfile}
           personalFinances={personalFinances}
-          businessFinances={businessFinances}
+          {...(businessFinances ? { businessFinances } : {})}
           onBackToDashboard={handleBackToDashboard}
         />
       )}
