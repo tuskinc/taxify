@@ -12,6 +12,8 @@ import DocumentUploadPage from './components/DocumentUploadPage'
 import ReportPage from './components/ReportPage'
 import Onboarding from './components/Onboarding'
 import LandingPage from './components/LandingPage'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HomePage, LoginPage, SignUpPage, OnboardingPage, DashboardPage, TaxScenariosPage, ReportsPage, ProfilePage, PaymentPage, SupportPage, NotFoundPage, BudgetingPage, InvestmentsPage, TaxSummaryPage } from './pages'
 
 export interface UserProfile {
   id: string
@@ -83,6 +85,7 @@ function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [personalFinances, setPersonalFinances] = useState<PersonalFinances | null>(null)
   const [businessFinances, setBusinessFinances] = useState<BusinessFinances | null>(null)
+  const [fetchError, setFetchError] = useState<string | null>(null)
 
   useEffect(() => {
     console.log('App mounted')
@@ -106,6 +109,8 @@ function App() {
         if (!isMounted) return
         setUser(session?.user ?? null)
         if (session?.user) {
+          // Optimistic navigation to prevent UI stall; profile check will refine the step
+          setCurrentStep((prev) => (prev === 'landing' || prev === 'onboarding' || prev === 'auth' ? 'dashboard' : prev))
           await checkUserProfile(session.user.id)
         }
       } catch (error) {
@@ -120,12 +125,17 @@ function App() {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        console.log('🔐 Auth state changed:', event, session?.user?.email)
         if (!isMounted) return
         setUser(session?.user ?? null)
         if (session?.user) {
+          // Optimistic navigation to avoid being stuck on auth screen
+          setCurrentStep((prev) => (prev === 'landing' || prev === 'onboarding' || prev === 'auth' ? 'dashboard' : prev))
+          console.log('✅ User authenticated, checking profile...')
           await checkUserProfile(session.user.id)
         } else {
+          console.log('❌ No user session, resetting to landing')
           setCurrentStep('landing')
           setUserProfile(null)
           setPersonalFinances(null)
@@ -154,38 +164,48 @@ function App() {
 
   const checkUserProfile = async (userId: string) => {
     try {
+      console.log('🔍 Checking user profile for:', userId)
+      // reset any previous fetch error before attempting a fresh load
+      setFetchError(null)
       const { data: profile, error } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId)
         .maybeSingle()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error fetching profile:', error)
+        throw error
+      }
+
+      console.log('📊 Profile data:', profile)
+      console.log('🔍 Profile exists:', !!profile)
 
       if (profile) {
+        console.log('✅ Profile found, normalizing data...')
         const p = profile as Record<string, unknown>
         const toStringOrEmpty = (v: unknown) => (typeof v === 'string' ? v : '')
         const toNumberOrZero = (v: unknown) => (typeof v === 'number' ? v : 0)
-          const toScenarioArray = (v: unknown): TaxScenario[] => {
-            if (Array.isArray(v)) {
-              // Accept either array of ids or array of objects
-              const result: TaxScenario[] = []
-              for (const item of v) {
-                if (typeof item === 'string') {
-                  if (item in SCENARIOS) result.push(SCENARIOS[item as TaxScenarioId])
-                } else if (item && typeof item === 'object' && 'id' in item) {
-                  const obj = item as Partial<TaxScenario>
-                  const id = typeof obj.id === 'string' ? (obj.id as TaxScenarioId) : undefined
-                  if (id && (id in SCENARIOS)) {
-                    // merge with canonical to ensure required fields
-                    result.push({ ...SCENARIOS[id], ...obj })
-                  }
+        const toScenarioArray = (v: unknown): TaxScenario[] => {
+          if (Array.isArray(v)) {
+            // Accept either array of ids or array of objects
+            const result: TaxScenario[] = []
+            for (const item of v) {
+              if (typeof item === 'string') {
+                if (item in SCENARIOS) result.push(SCENARIOS[item as TaxScenarioId])
+              } else if (item && typeof item === 'object' && 'id' in item) {
+                const obj = item as Partial<TaxScenario>
+                const id = typeof obj.id === 'string' ? (obj.id as TaxScenarioId) : undefined
+              if (id && (id in SCENARIOS)) {
+                  // merge with canonical to ensure required fields
+                  result.push({ ...SCENARIOS[id], ...obj })
                 }
               }
-              return result
             }
-            return []
+            return result
           }
+          return []
+        }
         const normalizedProfile: UserProfile = {
           id: toStringOrEmpty(p.id),
           email: toStringOrEmpty(p.email),
@@ -198,18 +218,25 @@ function App() {
           created_at: toStringOrEmpty(p.created_at) || new Date().toISOString(),
           updated_at: toStringOrEmpty(p.updated_at) || new Date().toISOString(),
         }
+        console.log('✅ Normalized profile:', normalizedProfile)
         setUserProfile(normalizedProfile)
         
         // Check if user has completed all steps
         if (normalizedProfile.tax_scenarios && Array.isArray(normalizedProfile.tax_scenarios) && normalizedProfile.tax_scenarios.length > 0) {
+          console.log('💰 User has tax scenarios, checking finances...')
+          console.log('📋 Tax scenarios:', normalizedProfile.tax_scenarios)
           // Check for personal finances
-          const { data: personalData } = await supabase
+          const { data: personalData, error: personalError } = await supabase
             .from('personal_finances')
             .select('*')
             .eq('user_id', userId)
-            .single()
+            .maybeSingle()
 
-          if (personalData) {
+          if (personalError) {
+            console.error('❌ Error fetching personal finances:', personalError)
+            setFetchError('We couldn’t load your personal finances right now. Please try again. If the issue persists, contact support.')
+          } else if (personalData) {
+            console.log('✅ Personal finances found:', personalData)
             setPersonalFinances({
               ...personalData,
               annual_income: personalData.annual_income ?? 0,
@@ -221,13 +248,18 @@ function App() {
 
           // Check for business finances if needed
           if (Array.isArray(normalizedProfile.tax_scenarios) && normalizedProfile.tax_scenarios.some((s) => s.id === 'business' || s.id === 'combined')) {
-            const { data: businessData } = await supabase
+            console.log('Checking business finances...')
+            const { data: businessData, error: businessError } = await supabase
               .from('business_finances')
               .select('*')
               .eq('user_id', userId)
-              .single()
+              .maybeSingle()
 
-            if (businessData) {
+            if (businessError) {
+              console.error('Error fetching business finances:', businessError)
+              setFetchError('We couldn’t load your business finances right now. Please try again. If the issue persists, contact support.')
+            } else if (businessData) {
+              console.log('Business finances found:', businessData)
               setBusinessFinances({
                 ...businessData,
                 annual_revenue: businessData.annual_revenue ?? 0,
@@ -236,18 +268,28 @@ function App() {
             }
           }
 
+          console.log('🎯 Setting current step to dashboard')
           setCurrentStep('dashboard')
         } else {
+          console.log('📋 No tax scenarios, going to scenario selection')
           setCurrentStep('scenario')
         }
       } else {
+        console.log('👤 No profile found, going to profile setup')
         // No profile row yet → collect profile
         setCurrentStep('profile')
       }
     } catch (error) {
-      console.error('Error checking user profile:', error)
+      console.error('❌ Error checking user profile:', error)
+      setFetchError('We couldn’t load your account data. Please try again. If this continues, contact support.')
       setCurrentStep('profile')
     }
+  }
+
+  const handleRetryFetch = async () => {
+    if (!user?.id) return
+    setFetchError(null)
+    await checkUserProfile(user.id)
   }
 
   const handleProfileComplete = (profile: UserProfile) => {
@@ -290,6 +332,7 @@ function App() {
   }
 
 
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -302,6 +345,7 @@ function App() {
   }
 
   return (
+    <BrowserRouter>
     <div className="min-h-screen bg-[#fdf9f6]">
       {currentStep === 'landing' && (
         <LandingPage onGetStarted={() => { setCurrentStep('onboarding') }} />
@@ -401,6 +445,23 @@ function App() {
       )}
       
       {currentStep === 'dashboard' && userProfile && (
+        <>
+          {fetchError && (
+            <div className="mx-4 mt-4 mb-2 p-3 rounded border border-red-200 bg-red-50 text-red-800">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm leading-5">{fetchError}</p>
+                <div className="shrink-0 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleRetryFetch}
+                    className="px-3 py-1.5 text-sm rounded bg-red-600 text-white hover:bg-red-700"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         <Dashboard 
           user={user}
           userProfile={userProfile}
@@ -410,6 +471,7 @@ function App() {
           onUploadDocuments={handleNavigateToUpload}
           onGenerateReport={handleNavigateToReport}
         />
+        </>
       )}
 
       {currentStep === 'document_upload' && userProfile && (
@@ -426,11 +488,30 @@ function App() {
         <ReportPage
           userProfile={userProfile}
           personalFinances={personalFinances}
-          {...(businessFinances ? { businessFinances } : {})}
+            {...(businessFinances ? { businessFinances } : {})}
           onBackToDashboard={handleBackToDashboard}
         />
       )}
+
+        {/* Router-based navigation */}
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/budget" element={<BudgetingPage />} />
+          <Route path="/investments" element={<InvestmentsPage />} />
+          <Route path="/tax-summary" element={<TaxSummaryPage />} />
+          <Route path="/scenarios" element={<TaxScenariosPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
     </div>
+    </BrowserRouter>
   )
 }
 

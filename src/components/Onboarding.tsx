@@ -36,21 +36,33 @@ export default function Onboarding({ onAuthSuccess }: OnboardingProps) {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        console.log('Attempting sign in with:', email)
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
-        if (error) throw error
+        console.log('Sign in response:', { data, error })
+        if (error) {
+          console.error('Sign in error:', error)
+          throw error
+        }
+        console.log('Sign in successful, calling onAuthSuccess')
         onAuthSuccess()
       } else {
-        const { error } = await supabase.auth.signUp({
+        console.log('Attempting sign up with:', email)
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
         })
-        if (error) throw error
+        console.log('Sign up response:', { data, error })
+        if (error) {
+          console.error('Sign up error:', error)
+          throw error
+        }
         setMessage('Check your email for the confirmation link!')
       }
     } catch (err: unknown) {
+      console.error('Auth error:', err)
       const e = err as Partial<ErrorLike>
       setError(typeof e.message === 'string' ? e.message : 'An unexpected error occurred')
     } finally {
