@@ -14,6 +14,9 @@ import Onboarding from './components/Onboarding'
 import LandingPage from './components/LandingPage'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { HomePage, LoginPage, SignUpPage, OnboardingPage, DashboardPage, TaxScenariosPage, ReportsPage, ProfilePage, PaymentPage, SupportPage, NotFoundPage, BudgetingPage, InvestmentsPage, TaxSummaryPage } from './pages'
+import LoginPage from './pages/LoginPage'
+import SignUpPage from './pages/SignUpPage'
+import OnboardingPage from './pages/OnboardingPage'
 
 export interface UserProfile {
   id: string
@@ -126,7 +129,8 @@ function App() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔐 Auth state changed:', event, session?.user?.email)
+        const sessionEmail = session?.user?.email
+        console.log('🔐 Auth state changed:', event, sessionEmail)
         if (!isMounted) return
         setUser(session?.user ?? null)
         if (session?.user) {
@@ -195,7 +199,7 @@ function App() {
                 if (item in SCENARIOS) result.push(SCENARIOS[item as TaxScenarioId])
               } else if (item && typeof item === 'object' && 'id' in item) {
                 const obj = item as Partial<TaxScenario>
-                const id = typeof obj.id === 'string' ? (obj.id as TaxScenarioId) : undefined
+                const id = typeof obj.id === 'string' ? obj.id : undefined
               if (id && (id in SCENARIOS)) {
                   // merge with canonical to ensure required fields
                   result.push({ ...SCENARIOS[id], ...obj })
@@ -222,7 +226,7 @@ function App() {
         setUserProfile(normalizedProfile)
         
         // Check if user has completed all steps
-        if (normalizedProfile.tax_scenarios && Array.isArray(normalizedProfile.tax_scenarios) && normalizedProfile.tax_scenarios.length > 0) {
+        if (normalizedProfile.tax_scenarios.length > 0) {
           console.log('💰 User has tax scenarios, checking finances...')
           console.log('📋 Tax scenarios:', normalizedProfile.tax_scenarios)
           // Check for personal finances
@@ -453,7 +457,7 @@ function App() {
                 <div className="shrink-0 flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={handleRetryFetch}
+                    onClick={() => { void handleRetryFetch() }}
                     className="px-3 py-1.5 text-sm rounded bg-red-600 text-white hover:bg-red-700"
                   >
                     Retry
@@ -493,22 +497,12 @@ function App() {
         />
       )}
 
-        {/* Router-based navigation */}
+        {/* Router-based navigation (public routes only) */}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/budget" element={<BudgetingPage />} />
-          <Route path="/investments" element={<InvestmentsPage />} />
-          <Route path="/tax-summary" element={<TaxSummaryPage />} />
-          <Route path="/scenarios" element={<TaxScenariosPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/support" element={<SupportPage />} />
-          <Route path="*" element={<NotFoundPage />} />
         </Routes>
     </div>
     </BrowserRouter>
