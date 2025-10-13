@@ -35,6 +35,10 @@ interface DashboardProps {
   onStartNewAnalysis?: () => void
   onUploadDocuments?: () => void
   onGenerateReport?: () => void
+  onConnectCRM?: () => void
+  onTaxCalendar?: () => void
+  onBudgeting?: () => void
+  onInvestments?: () => void
 }
 
 export default function Dashboard({ 
@@ -43,7 +47,11 @@ export default function Dashboard({
   businessFinances, 
   onStartNewAnalysis,
   onUploadDocuments,
-  onGenerateReport
+  onGenerateReport,
+  onConnectCRM,
+  onTaxCalendar,
+  onBudgeting,
+  onInvestments
 }: DashboardProps) {
   const personalTaxableIncome: number = (personalFinances?.annual_income ?? 0) + (personalFinances?.other_income ?? 0) - (personalFinances?.deductions ?? 0)
 
@@ -63,7 +71,7 @@ export default function Dashboard({
       title: 'Connect CRM',
       description: 'Connect your CRM system for automatic data sync',
       icon: Building2,
-      action: () => { console.log('Navigate to CRM connection') },
+      action: onConnectCRM ?? (() => { console.log('Navigate to CRM connection') }),
       color: 'bg-green-500 hover:bg-green-600'
     },
     {
@@ -77,8 +85,22 @@ export default function Dashboard({
       title: 'Tax Calendar',
       description: 'View important tax dates and deadlines',
       icon: Calendar,
-      action: () => { console.log('View calendar') },
+      action: onTaxCalendar ?? (() => { console.log('View calendar') }),
       color: 'bg-orange-500 hover:bg-orange-600'
+    },
+    {
+      title: 'Budgeting',
+      description: 'Track income, expenses, and savings',
+      icon: DollarSign,
+      action: onBudgeting ?? (() => { console.log('Navigate to budgeting') }),
+      color: 'bg-indigo-500 hover:bg-indigo-600'
+    },
+    {
+      title: 'Investments',
+      description: 'Manage your investment portfolio',
+      icon: TrendingUp,
+      action: onInvestments ?? (() => { console.log('Navigate to investments') }),
+      color: 'bg-emerald-500 hover:bg-emerald-600'
     }
   ]
 

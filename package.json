@@ -7,7 +7,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "fix:routes": "node scripts/fixRoutes.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -26,6 +27,7 @@
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.62.0",
     "react-router-dom": "^7.9.3",
+    "recharts": "^3.2.1",
     "zod": "^4.1.8"
   },
   "devDependencies": {
