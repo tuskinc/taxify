@@ -1,5 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Sanitized logger for auth operations
+const authLogger = {
+  error: (message: string, metadata: Record<string, any> = {}) => {
+    // Only log non-sensitive metadata in production
+    const sanitizedMetadata: Record<string, any> = {
+      timestamp: new Date().toISOString(),
+      service: 'auth',
+      ...metadata
+    };
+    
+    // Remove any potentially sensitive fields
+    delete sanitizedMetadata.token;
+    delete sanitizedMetadata.user;
+    delete sanitizedMetadata.error;
+    delete sanitizedMetadata.stack;
+    delete sanitizedMetadata.message;
+    
+    console.error(`[AUTH] ${message}`, sanitizedMetadata);
+  }
+};
+
 // Initialize Supabase client for auth verification
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -33,7 +54,11 @@ export async function authenticateUser(request: Request): Promise<AuthenticatedU
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      console.error('Auth verification failed:', error);
+      authLogger.error('Auth verification failed', { 
+        errorCode: error?.message ? 'AUTH_VERIFICATION_ERROR' : 'NO_USER_DATA',
+        hasError: !!error,
+        hasUser: !!user
+      });
       return null;
     }
 
@@ -42,7 +67,10 @@ export async function authenticateUser(request: Request): Promise<AuthenticatedU
       email: user.email
     };
   } catch (error) {
-    console.error('Error authenticating user:', error);
+    authLogger.error('Error authenticating user', { 
+      errorCode: 'AUTH_PROCESSING_ERROR',
+      errorType: error instanceof Error ? error.constructor.name : 'Unknown'
+    });
     return null;
   }
 }

@@ -18,24 +18,22 @@ export default function DashboardPage() {
       } catch (error) {
         console.error('Failed to fetch session:', error)
         if (!isMounted) return
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login', { replace: true })
-    }
-  }, [loading, user, navigate])
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>
-  if (!user) return null
+        setUser(null)
       } finally {
         if (isMounted) setLoading(false)
       }
     }
     void init()
     return () => { isMounted = false }
-  }, [])
+  }, [navigate])
 
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login', { replace: true })
+    }
+  }, [loading, user, navigate])
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>
-  if (!user) { navigate('/login', { replace: true }); return null }
+  if (!user) return null
 
   return (
     <div className="min-h-screen bg-[#fdf9f6]">
@@ -45,7 +43,6 @@ export default function DashboardPage() {
         personalFinances={null}
         businessFinances={null}
         onStartNewAnalysis={() => { navigate('/analysis') }}
-        onUploadDocuments={() => { navigate('/upload') }}
         onGenerateReport={() => { navigate('/reports') }}
         onConnectCRM={() => { navigate('/crm') }}
         onTaxCalendar={() => { navigate('/tax-calendar') }}

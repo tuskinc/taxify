@@ -11,23 +11,14 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  Area,
-  AreaChart
+  ResponsiveContainer
 } from 'recharts'
 import { 
   Plus, 
   TrendingUp, 
-  TrendingDown, 
   DollarSign, 
   Target, 
-  AlertCircle,
-  Filter,
-  Download,
   Brain,
-  PieChart as PieChartIcon,
   BarChart3
 } from 'lucide-react'
 
@@ -70,8 +61,6 @@ export default function InvestmentsPage() {
   const [investments, setInvestments] = useState<Investment[]>([])
   const [summary, setSummary] = useState<PortfolioSummary | null>(null)
   const [showAddInvestment, setShowAddInvestment] = useState(false)
-  const [selectedAssetType, setSelectedAssetType] = useState('all')
-  const [selectedRiskLevel, setSelectedRiskLevel] = useState('all')
   const [aiInsights, setAiInsights] = useState<string>('')
   const [loadingInsights, setLoadingInsights] = useState(false)
   const navigate = useNavigate()
@@ -98,7 +87,7 @@ export default function InvestmentsPage() {
           return
         }
         // pass the session user directly to avoid race on state
-        await loadInvestments(session.user)
+        await loadInvestments()
       } catch (error) {
         console.error('Failed to fetch session:', error)
         if (!isMounted) return
@@ -111,28 +100,17 @@ export default function InvestmentsPage() {
     return () => { isMounted = false }
   }, [navigate])
 
-  // ↓ apply the signature change here ↓
-  const loadInvestments = async (currentUser = user) => {
-    try {
-      const response = await fetch(
-        `/api/financial-data?user_id=${currentUser?.id}&type=investments`
-      )
-      // …rest of your existing logic…
-    } catch (error) {
-      // …existing error handling…
-    }
-  }
   const loadInvestments = async () => {
     try {
-      const response = await fetch(`/api/financial-data?user_id=${user?.id}&type=investments`)
-      const result = await response.json()
-      
-      if (result.success) {
-        setInvestments(result.data || [])
-        calculateSummary(result.data || [])
-      } else {
-        throw new Error(result.error)
-      }
+      const { data, error } = await supabase
+        .from('investments')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      setInvestments(data || [])
+      calculateSummary(data || [])
     } catch (error) {
       console.error('Failed to load investments:', error)
     }
@@ -183,25 +161,19 @@ export default function InvestmentsPage() {
     if (!user) return
 
     try {
-      const response = await fetch('/api/financial-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'investment',
+      const { error } = await supabase
+        .from('investments')
+        .insert({
           user_id: user.id,
-          data: {
-            asset_type: newInvestment.asset_type,
-            amount_invested: parseFloat(newInvestment.amount_invested),
-            current_value: parseFloat(newInvestment.current_value),
-            risk_level: newInvestment.risk_level,
-            symbol: newInvestment.symbol,
-            purchase_date: newInvestment.purchase_date
-          }
+          asset_type: newInvestment.asset_type,
+          amount_invested: parseFloat(newInvestment.amount_invested),
+          current_value: parseFloat(newInvestment.current_value),
+          risk_level: newInvestment.risk_level,
+          symbol: newInvestment.symbol || null,
+          purchase_date: newInvestment.purchase_date || null
         })
-      })
 
-      const result = await response.json()
-      if (!result.success) throw new Error(result.error)
+      if (error) throw error
 
       setNewInvestment({
         asset_type: '',
@@ -221,26 +193,66 @@ export default function InvestmentsPage() {
   const generateAIInsights = async () => {
     setLoadingInsights(true)
     try {
-      const response = await fetch('/api/ai-insights', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user?.id,
-          insight_type: 'investment'
-        })
-      })
+      // Generate basic insights based on portfolio data
+      const insights = []
+      
+      if (summary) {
+        if (summary.roiPercentage > 10) {
+          insights.push({
+            title: 'Strong Portfolio Performance',
+            priority: 'high',
+            description: `Your portfolio is performing well with a ${summary.roiPercentage.toFixed(1)}% ROI.`,
+            recommendation: 'Consider rebalancing to maintain this performance.',
+            impact: 'Positive impact on long-term wealth building.'
+          })
+        } else if (summary.roiPercentage < -5) {
+          insights.push({
+            title: 'Portfolio Underperformance',
+            priority: 'high',
+            description: `Your portfolio is underperforming with a ${summary.roiPercentage.toFixed(1)}% ROI.`,
+            recommendation: 'Review your investment strategy and consider diversification.',
+            impact: 'May require immediate attention to prevent further losses.'
+          })
+        }
 
-      const result = await response.json()
-      if (result.success) {
-        const insights = result.data.insights
-        const formattedInsights = insights.map((insight: any) => 
-          `${insight.title} (${insight.priority.toUpperCase()} PRIORITY)\n${insight.description}\n\nRecommendation: ${insight.recommendation}\nImpact: ${insight.impact}\n`
-        ).join('\n---\n\n')
-        
-        setAiInsights(formattedInsights)
-      } else {
-        throw new Error(result.error)
+        if (summary.totalValue > summary.totalInvested * 1.2) {
+          insights.push({
+            title: 'Excellent Growth',
+            priority: 'medium',
+            description: 'Your investments have grown significantly.',
+            recommendation: 'Consider taking some profits or rebalancing.',
+            impact: 'Good opportunity to secure gains.'
+          })
+        }
+
+        const riskDistribution = summary.riskDistribution
+        const highRiskPercentage = (riskDistribution.high || 0) / summary.totalValue * 100
+        if (highRiskPercentage > 50) {
+          insights.push({
+            title: 'High Risk Concentration',
+            priority: 'medium',
+            description: 'Your portfolio has a high concentration of risky investments.',
+            recommendation: 'Consider diversifying with lower-risk assets.',
+            impact: 'Reducing risk exposure could improve stability.'
+          })
+        }
       }
+
+      if (insights.length === 0) {
+        insights.push({
+          title: 'Portfolio Analysis',
+          priority: 'low',
+          description: 'Your portfolio appears to be well-balanced.',
+          recommendation: 'Continue monitoring and adjusting as needed.',
+          impact: 'Maintaining current strategy seems appropriate.'
+        })
+      }
+
+      const formattedInsights = insights.map(insight => 
+        `${insight.title} (${insight.priority.toUpperCase()} PRIORITY)\n${insight.description}\n\nRecommendation: ${insight.recommendation}\nImpact: ${insight.impact}\n`
+      ).join('\n---\n\n')
+      
+      setAiInsights(formattedInsights)
     } catch (error) {
       console.error('Failed to generate insights:', error)
       setAiInsights('Unable to generate AI insights at this time. Please try again later.')
@@ -370,12 +382,12 @@ export default function InvestmentsPage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {assetTypeData.map((entry, index) => (
+                    {assetTypeData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={`hsl(${index * 45}, 70%, 50%)`} />
                     ))}
                   </Pie>

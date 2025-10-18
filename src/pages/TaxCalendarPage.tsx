@@ -3,6 +3,13 @@ import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import { Calendar, Clock, AlertTriangle, CheckCircle } from 'lucide-react'
 
+// TypeScript interfaces
+interface User {
+  id: string
+  email?: string
+  [key: string]: unknown // Allow for additional Supabase user properties
+}
+
 interface TaxDeadline {
   id: string
   title: string
@@ -14,16 +21,8 @@ interface TaxDeadline {
 }
 
 export default function TaxCalendarPage() {
-// At the top of src/pages/TaxCalendarPage.tsx
-import { supabase } from '../lib/supabase'
-import type { User } from '@supabase/supabase-js'
-
-function TaxCalendarPage() {
-  // …
- const [user, setUser] = useState<User | null>(null)
-
-  // …
-}  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
   const [deadlines, setDeadlines] = useState<TaxDeadline[]>([])
   const navigate = useNavigate()
 
@@ -33,9 +32,9 @@ function TaxCalendarPage() {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (!isMounted) return
-        setUser(session?.user ?? null)
+        setUser(session?.user as unknown as User ?? null)
         if (!session?.user) {
-          navigate('/login')
+          void navigate('/login')
           return
         }
       } catch (error) {
@@ -57,7 +56,7 @@ function TaxCalendarPage() {
       {
         id: '1',
         title: 'Tax Filing Deadline',
-        date: `${currentYear}-04-15`,
+        date: `${currentYear.toString()}-04-15`,
         type: 'federal',
         priority: 'high',
         description: 'Last day to file your federal income tax return',
@@ -66,43 +65,43 @@ function TaxCalendarPage() {
       {
         id: '2',
         title: 'Q1 Estimated Tax Payment',
-        date: `${currentYear}-01-15`,
+        date: `${currentYear.toString()}-01-15`,
         type: 'quarterly',
         priority: 'high',
-        description: `First quarterly estimated tax payment for ${currentYear}`,
+        description: `First quarterly estimated tax payment for ${currentYear.toString()}`,
         completed: true
       },
       {
         id: '3',
         title: 'Q2 Estimated Tax Payment',
-        date: `${currentYear}-04-15`,
+        date: `${currentYear.toString()}-04-15`,
         type: 'quarterly',
         priority: 'high',
-        description: `Second quarterly estimated tax payment for ${currentYear}`,
+        description: `Second quarterly estimated tax payment for ${currentYear.toString()}`,
         completed: false
       },
       {
         id: '4',
         title: 'Q3 Estimated Tax Payment',
-        date: `${currentYear}-06-15`,
+        date: `${currentYear.toString()}-06-15`,
         type: 'quarterly',
         priority: 'medium',
-        description: `Third quarterly estimated tax payment for ${currentYear}`,
+        description: `Third quarterly estimated tax payment for ${currentYear.toString()}`,
         completed: false
       },
       {
         id: '5',
         title: 'Q4 Estimated Tax Payment',
-        date: `${currentYear}-09-15`,
+        date: `${currentYear.toString()}-09-15`,
         type: 'quarterly',
         priority: 'medium',
-        description: `Fourth quarterly estimated tax payment for ${currentYear}`,
+        description: `Fourth quarterly estimated tax payment for ${currentYear.toString()}`,
         completed: false
       },
       {
         id: '6',
         title: 'State Tax Deadline',
-        date: `${currentYear}-04-15`,
+        date: `${currentYear.toString()}-04-15`,
         type: 'state',
         priority: 'high',
         description: 'Most state income tax returns are due',
@@ -111,19 +110,19 @@ function TaxCalendarPage() {
       {
         id: '7',
         title: 'IRA Contribution Deadline',
-        date: `${currentYear}-04-15`,
+        date: `${currentYear.toString()}-04-15`,
         type: 'other',
         priority: 'medium',
-        description: `Last day to contribute to traditional IRA for ${currentYear - 1} tax year`,
+        description: `Last day to contribute to traditional IRA for ${(currentYear - 1).toString()} tax year`,
         completed: false
       },
       {
         id: '8',
         title: 'HSA Contribution Deadline',
-        date: `${currentYear}-04-15`,
+        date: `${currentYear.toString()}-04-15`,
         type: 'other',
         priority: 'medium',
-        description: `Last day to contribute to HSA for ${currentYear - 1} tax year`,
+        description: `Last day to contribute to HSA for ${(currentYear - 1).toString()} tax year`,
         completed: false
       }
     ]
@@ -215,7 +214,7 @@ function TaxCalendarPage() {
                             <span className="font-medium">{formatDate(deadline.date)}</span>
                             {daysUntil >= 0 && (
                               <span className="ml-2 text-orange-600">
-                                ({daysUntil === 0 ? 'Today' : `${daysUntil} days`})
+                                ({daysUntil === 0 ? 'Today' : `${daysUntil.toString()} days`})
                               </span>
                             )}
                           </div>
@@ -288,7 +287,7 @@ function TaxCalendarPage() {
         {/* Back to Dashboard */}
         <div className="mt-8 text-center">
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => { void navigate('/dashboard') }}
             className="text-blue-600 hover:text-blue-800 font-medium"
           >
             ← Back to Dashboard

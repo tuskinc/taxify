@@ -104,7 +104,7 @@ export default function BudgetingPage() {
           navigate('/login')
           return
         }
-        await loadTransactions(session.user.id)
+        await loadTransactions()
       } catch (error) {
         console.error('Failed to fetch session:', error)
         if (!isMounted) return
@@ -115,20 +115,8 @@ export default function BudgetingPage() {
     }
     void init()
     return () => { isMounted = false }
-  }, [navigate])
+  }, [navigate, user])
 
-  // -----------------------------------------------------------------
-
- const loadTransactions = async (userId?: string) => {
-    try {
-     const response = await fetch(
-       `/api/financial-data?user_id=${userId ?? user?.id}&type=budgets`
-     )
-      // ...rest of implementation
-    } catch (error) {
-      // error handling
-    }
-  }
   const calculateSummary = (transactions: BudgetTransaction[]) => {
     const income = transactions
       .filter(t => t.type === 'income')
@@ -165,12 +153,6 @@ export default function BudgetingPage() {
     e.preventDefault()
     if (!user) return
 
-    const amount = parseFloat(newTransaction.amount)
-    if (isNaN(amount) || amount <= 0) {
-      alert('Please enter a valid positive amount')
-      return
-    }
-
     try {
       const response = await fetch('/api/financial-data', {
         method: 'POST',
@@ -180,7 +162,7 @@ export default function BudgetingPage() {
           user_id: user.id,
           data: {
             category: newTransaction.category,
-            amount,
+            amount: parseFloat(newTransaction.amount),
             type: newTransaction.type,
             date: newTransaction.date,
             notes: newTransaction.notes
@@ -189,7 +171,7 @@ export default function BudgetingPage() {
       })
 
       const result = await response.json()
-      if (!result.success) throw new Error(result.error)
+      if (!result.success) throw new Error(result.error ?? 'Failed to add transaction')
 
       setNewTransaction({
         category: '',
@@ -202,15 +184,9 @@ export default function BudgetingPage() {
       await loadTransactions()
     } catch (error) {
       console.error('Failed to add transaction:', error)
-      alert('Failed to add transaction. Please try again.')
-    }
-  }      setShowAddTransaction(false)
-      await loadTransactions()
-    } catch (error) {
-      console.error('Failed to add transaction:', error)
-      alert('Failed to add transaction. Please try again.')
     }
   }
+
   const generateAIInsights = async () => {
     setLoadingInsights(true)
     try {
@@ -564,11 +540,6 @@ export default function BudgetingPage() {
           >
             ← Back to Dashboard
           </button>
-        </div>
-      </div>
-    </div>
-  )
-}          </button>
         </div>
       </div>
     </div>

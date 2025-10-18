@@ -62,11 +62,10 @@ interface FinancialSummary {
 export async function GET(request: Request) {
   try {
     // Authenticate the user
-    const authenticatedUser = await authenticateUser(request as any);
+    const authenticatedUser = await authenticateUser(request);
     if (!authenticatedUser) {
       return createResponse({ error: 'Unauthorized' }, 401);
     }
-
     const { searchParams } = new URL(request.url);
     const requestedUserId = searchParams.get('user_id');
     const dataType = searchParams.get('type'); // 'budgets', 'investments', or 'summary'
@@ -186,6 +185,76 @@ export async function GET(request: Request) {
   }
 }
 
+// Validation functions
+const validateBudgetData = (data: any) => {
+  const errors: string[] = [];
+  
+  // Required fields
+  if (!data.category || typeof data.category !== 'string' || data.category.trim() === '') {
+    errors.push('Category is required and must be a non-empty string');
+  }
+  
+  if (data.amount === undefined || data.amount === null) {
+    errors.push('Amount is required');
+  } else if (typeof data.amount !== 'number' || isNaN(data.amount) || data.amount <= 0) {
+    errors.push('Amount must be a positive number');
+  }
+  
+  if (!data.type || !['income', 'expense'].includes(data.type)) {
+    errors.push('Type is required and must be either "income" or "expense"');
+  }
+  
+  if (!data.date) {
+    errors.push('Date is required');
+  } else {
+    const dateObj = new Date(data.date);
+    if (isNaN(dateObj.getTime())) {
+      errors.push('Date must be a valid date in ISO format');
+    }
+  }
+  
+  return errors;
+};
+
+const validateInvestmentData = (data: any) => {
+  const errors: string[] = [];
+  
+  // Required fields
+  if (!data.asset_type || typeof data.asset_type !== 'string' || data.asset_type.trim() === '') {
+    errors.push('Asset type is required and must be a non-empty string');
+  }
+  
+  if (data.amount_invested === undefined || data.amount_invested === null) {
+    errors.push('Amount invested is required');
+  } else if (typeof data.amount_invested !== 'number' || isNaN(data.amount_invested) || data.amount_invested <= 0) {
+    errors.push('Amount invested must be a positive number');
+  }
+  
+  if (data.current_value === undefined || data.current_value === null) {
+    errors.push('Current value is required');
+  } else if (typeof data.current_value !== 'number' || isNaN(data.current_value) || data.current_value < 0) {
+    errors.push('Current value must be a non-negative number');
+  }
+  
+  if (!data.risk_level || !['low', 'medium', 'high'].includes(data.risk_level)) {
+    errors.push('Risk level is required and must be "low", "medium", or "high"');
+  }
+  
+  // Optional fields validation
+  if (data.symbol && (typeof data.symbol !== 'string' || data.symbol.trim() === '')) {
+    errors.push('Symbol must be a non-empty string if provided');
+  }
+  
+  if (data.purchase_date) {
+    const dateObj = new Date(data.purchase_date);
+    if (isNaN(dateObj.getTime())) {
+      errors.push('Purchase date must be a valid date in ISO format if provided');
+    }
+  }
+  
+  return errors;
+};
+
 // POST - Add new financial data
 export async function POST(request: Request) {
   try {
@@ -207,15 +276,24 @@ export async function POST(request: Request) {
     }
 
     if (type === 'budget') {
+      // Validate budget data
+      const validationErrors = validateBudgetData(data);
+      if (validationErrors.length > 0) {
+        return createResponse({ 
+          error: 'Validation failed', 
+          details: validationErrors 
+        }, 400);
+      }
+
       const { error } = await supabase
         .from('budgets')
         .insert({
           user_id: userId,
-          category: data.category,
+          category: data.category.trim(),
           amount: data.amount,
           type: data.type,
           date: data.date,
-          notes: data.notes
+          notes: data.notes || ''
         });
 
       if (error) throw error;
@@ -224,16 +302,25 @@ export async function POST(request: Request) {
     }
 
     if (type === 'investment') {
+      // Validate investment data
+      const validationErrors = validateInvestmentData(data);
+      if (validationErrors.length > 0) {
+        return createResponse({ 
+          error: 'Validation failed', 
+          details: validationErrors 
+        }, 400);
+      }
+
       const { error } = await supabase
         .from('investments')
         .insert({
           user_id: userId,
-          asset_type: data.asset_type,
+          asset_type: data.asset_type.trim(),
           amount_invested: data.amount_invested,
           current_value: data.current_value,
           risk_level: data.risk_level,
-          symbol: data.symbol,
-          purchase_date: data.purchase_date
+          symbol: data.symbol?.trim() || null,
+          purchase_date: data.purchase_date || null
         });
 
       if (error) throw error;
@@ -280,11 +367,38 @@ export async function PUT(request: Request) {
       // Build sparse update object for budget
       const updateData: any = {};
       
-      if (data.category !== undefined) updateData.category = data.category;
-      if (data.amount !== undefined) updateData.amount = data.amount;
-      if (data.type !== undefined) updateData.type = data.type;
-      if (data.date !== undefined) updateData.date = data.date;
-      if (data.notes !== undefined) updateData.notes = data.notes;
+      if (data.category !== undefined) {
+        if (typeof data.category !== 'string' || data.category.trim() === '') {
+          return createResponse({ error: 'Category must be a non-empty string' }, 400);
+        }
+        updateData.category = data.category.trim();
+      }
+      
+      if (data.amount !== undefined) {
+        if (typeof data.amount !== 'number' || isNaN(data.amount) || data.amount <= 0) {
+          return createResponse({ error: 'Amount must be a positive number' }, 400);
+        }
+        updateData.amount = data.amount;
+      }
+      
+      if (data.type !== undefined) {
+        if (!['income', 'expense'].includes(data.type)) {
+          return createResponse({ error: 'Type must be either "income" or "expense"' }, 400);
+        }
+        updateData.type = data.type;
+      }
+      
+      if (data.date !== undefined) {
+        const dateObj = new Date(data.date);
+        if (isNaN(dateObj.getTime())) {
+          return createResponse({ error: 'Date must be a valid date in ISO format' }, 400);
+        }
+        updateData.date = data.date;
+      }
+      
+      if (data.notes !== undefined) {
+        updateData.notes = data.notes || '';
+      }
 
       // Validate that at least one field is provided for update
       if (Object.keys(updateData).length === 0) {
@@ -306,12 +420,50 @@ export async function PUT(request: Request) {
       // Build sparse update object for investment
       const updateData: any = {};
       
-      if (data.asset_type !== undefined) updateData.asset_type = data.asset_type;
-      if (data.amount_invested !== undefined) updateData.amount_invested = data.amount_invested;
-      if (data.current_value !== undefined) updateData.current_value = data.current_value;
-      if (data.risk_level !== undefined) updateData.risk_level = data.risk_level;
-      if (data.symbol !== undefined) updateData.symbol = data.symbol;
-      if (data.purchase_date !== undefined) updateData.purchase_date = data.purchase_date;
+      if (data.asset_type !== undefined) {
+        if (typeof data.asset_type !== 'string' || data.asset_type.trim() === '') {
+          return createResponse({ error: 'Asset type must be a non-empty string' }, 400);
+        }
+        updateData.asset_type = data.asset_type.trim();
+      }
+      
+      if (data.amount_invested !== undefined) {
+        if (typeof data.amount_invested !== 'number' || isNaN(data.amount_invested) || data.amount_invested <= 0) {
+          return createResponse({ error: 'Amount invested must be a positive number' }, 400);
+        }
+        updateData.amount_invested = data.amount_invested;
+      }
+      
+      if (data.current_value !== undefined) {
+        if (typeof data.current_value !== 'number' || isNaN(data.current_value) || data.current_value < 0) {
+          return createResponse({ error: 'Current value must be a non-negative number' }, 400);
+        }
+        updateData.current_value = data.current_value;
+      }
+      
+      if (data.risk_level !== undefined) {
+        if (!['low', 'medium', 'high'].includes(data.risk_level)) {
+          return createResponse({ error: 'Risk level must be "low", "medium", or "high"' }, 400);
+        }
+        updateData.risk_level = data.risk_level;
+      }
+      
+      if (data.symbol !== undefined) {
+        if (data.symbol && (typeof data.symbol !== 'string' || data.symbol.trim() === '')) {
+          return createResponse({ error: 'Symbol must be a non-empty string if provided' }, 400);
+        }
+        updateData.symbol = data.symbol?.trim() || null;
+      }
+      
+      if (data.purchase_date !== undefined) {
+        if (data.purchase_date) {
+          const dateObj = new Date(data.purchase_date);
+          if (isNaN(dateObj.getTime())) {
+            return createResponse({ error: 'Purchase date must be a valid date in ISO format if provided' }, 400);
+          }
+        }
+        updateData.purchase_date = data.purchase_date || null;
+      }
 
       // Validate that at least one field is provided for update
       if (Object.keys(updateData).length === 0) {

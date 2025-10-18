@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Calendar, TrendingUp, DollarSign, Building2, Users, Calculator, Play } from 'lucide-react'
+import { BarChart3, Calendar, TrendingUp, DollarSign, Building2, Users, Calculator, Play } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
 type TaxScenarioId = 'personal' | 'business' | 'combined'
@@ -33,7 +33,6 @@ interface DashboardProps {
   personalFinances?: PersonalFinance | null
   businessFinances?: BusinessFinance | null
   onStartNewAnalysis?: () => void
-  onUploadDocuments?: () => void
   onGenerateReport?: () => void
   onConnectCRM?: () => void
   onTaxCalendar?: () => void
@@ -46,7 +45,6 @@ export default function Dashboard({
   personalFinances, 
   businessFinances, 
   onStartNewAnalysis,
-  onUploadDocuments,
   onGenerateReport,
   onConnectCRM,
   onTaxCalendar,
@@ -60,13 +58,6 @@ export default function Dashboard({
   const totalTaxableIncome: number = personalTaxableIncome + businessNetIncome
 
   const quickActions = [
-    {
-      title: 'Upload Documents',
-      description: 'Upload your financial documents for analysis',
-      icon: FileText,
-      action: onUploadDocuments,
-      color: 'bg-blue-500 hover:bg-blue-600'
-    },
     {
       title: 'Connect CRM',
       description: 'Connect your CRM system for automatic data sync',
@@ -158,13 +149,6 @@ export default function Dashboard({
               </div>
             </div>
             <div className="flex items-center btn-row space-x-3">
-              <button
-                onClick={onUploadDocuments}
-                className="btn btn-ghost"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Upload Documents
-              </button>
               <button
                 onClick={onGenerateReport}
                 className="btn btn-primary"

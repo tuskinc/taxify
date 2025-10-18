@@ -196,6 +196,56 @@ export type Database = {
         }
         Relationships: []
       }
+      document_uploads: {
+        Row: {
+          id: string
+          user_id: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          upload_method: string
+          processing_status: string
+          extracted_data: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          upload_method: string
+          processing_status?: string
+          extracted_data?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          upload_method?: string
+          processing_status?: string
+          extracted_data?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_uploads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

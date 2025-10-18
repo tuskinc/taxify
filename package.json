@@ -8,7 +8,10 @@
     "lint": "eslint .",
     "test": "vitest",
     "preview": "vite preview",
-    "fix:routes": "node scripts/fixRoutes.js"
+    "fix:routes": "node scripts/fixRoutes.js",
+    "setup": "node scripts/setup-project.js",
+    "fix:security": "node scripts/fix-security-issues.js",
+    "postinstall": "node scripts/setup-project.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
