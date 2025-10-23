@@ -42,15 +42,13 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
 
     try {
       const { error } = await supabase
-        .from('users')
+        .from('user_profiles')
         .insert({
-          id: user.id,
-          email: user.email,
+          user_id: user.id,
           country: data.country,
           filing_status: data.filing_status,
           birth_date: data.birth_date,
           dependents: data.dependents,
-          spouse_income: data.spouse_income,
         })
 
       if (error) throw error

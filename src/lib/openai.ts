@@ -1,10 +1,36 @@
 import OpenAI from 'openai';
+import { apiKeyService, trackAPIUsage } from './api-key-service';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Only for client-side usage
-});
+// Initialize OpenAI client with dynamic API key
+let openai: OpenAI | null = null;
+
+// Function to initialize OpenAI client with API key
+const initializeOpenAI = async (): Promise<OpenAI> => {
+  if (openai) return openai;
+
+  // Try to get API key from secure service first
+  const apiKey = await apiKeyService.getOpenAIKey();
+  
+  if (!apiKey) {
+    // Fallback to environment variable
+    const envKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (!envKey) {
+      throw new Error('OpenAI API key not found. Please configure your API key.');
+    }
+    
+    openai = new OpenAI({
+      apiKey: envKey,
+      dangerouslyAllowBrowser: true
+    });
+  } else {
+    openai = new OpenAI({
+      apiKey: apiKey,
+      dangerouslyAllowBrowser: true
+    });
+  }
+
+  return openai;
+};
 
 export interface AIAnalysisRequest {
   type: 'document_analysis' | 'tax_insights' | 'financial_advice' | 'report_generation';
@@ -56,10 +82,14 @@ export class OpenAIService {
    * Analyze uploaded financial documents
    */
   async analyzeDocument(request: DocumentAnalysisRequest): Promise<AIAnalysisResponse> {
+    const startTime = Date.now();
+    let client: OpenAI;
+    
     try {
+      client = await initializeOpenAI();
       const prompt = this.buildDocumentAnalysisPrompt(request);
       
-      const response = await openai.chat.completions.create({
+      const response = await client!.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
@@ -76,8 +106,33 @@ export class OpenAIService {
       });
 
       const content = response.choices[0]?.message?.content || '';
+      const responseTime = Date.now() - startTime;
+      
+      // Track usage
+      await trackAPIUsage({
+        keyType: 'openai',
+        userId: 'system', // You might want to pass actual user ID
+        endpoint: 'analyzeDocument',
+        tokensUsed: response.usage?.total_tokens || 0,
+        costUsd: this.calculateCost(response.usage?.total_tokens || 0),
+        responseTimeMs: responseTime,
+        success: true
+      });
+
       return this.parseDocumentAnalysisResponse(content);
     } catch (error) {
+      const responseTime = Date.now() - startTime;
+      
+      // Track failed usage
+      await trackAPIUsage({
+        keyType: 'openai',
+        userId: 'system',
+        endpoint: 'analyzeDocument',
+        responseTimeMs: responseTime,
+        success: false,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      });
+
       console.error('OpenAI document analysis error:', error);
       throw new Error('Failed to analyze document with AI');
     }
@@ -87,10 +142,14 @@ export class OpenAIService {
    * Generate tax insights and recommendations
    */
   async generateTaxInsights(request: TaxInsightsRequest): Promise<AIAnalysisResponse> {
+    const startTime = Date.now();
+    let client: OpenAI;
+    
     try {
+      client = await initializeOpenAI();
       const prompt = this.buildTaxInsightsPrompt(request);
       
-      const response = await openai.chat.completions.create({
+      const response = await client!.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
@@ -107,8 +166,33 @@ export class OpenAIService {
       });
 
       const content = response.choices[0]?.message?.content || '';
+      const responseTime = Date.now() - startTime;
+      
+      // Track usage
+      await trackAPIUsage({
+        keyType: 'openai',
+        userId: 'system',
+        endpoint: 'generateTaxInsights',
+        tokensUsed: response.usage?.total_tokens || 0,
+        costUsd: this.calculateCost(response.usage?.total_tokens || 0),
+        responseTimeMs: responseTime,
+        success: true
+      });
+
       return this.parseTaxInsightsResponse(content);
     } catch (error) {
+      const responseTime = Date.now() - startTime;
+      
+      // Track failed usage
+      await trackAPIUsage({
+        keyType: 'openai',
+        userId: 'system',
+        endpoint: 'generateTaxInsights',
+        responseTimeMs: responseTime,
+        success: false,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      });
+
       console.error('OpenAI tax insights error:', error);
       throw new Error('Failed to generate tax insights');
     }
@@ -121,7 +205,7 @@ export class OpenAIService {
     try {
       const prompt = this.buildReportGenerationPrompt(financialData, documentAnalysis);
       
-      const response = await openai.chat.completions.create({
+      const response = await openai!.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
@@ -151,7 +235,7 @@ export class OpenAIService {
     try {
       const prompt = this.buildFinancialAdvicePrompt(context);
       
-      const response = await openai.chat.completions.create({
+      const response = await openai!.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
@@ -335,10 +419,16 @@ Format your response as JSON with the following structure:
       };
     }
   }
+
+  /**
+   * Calculate cost based on token usage
+   */
+  private calculateCost(tokens: number): number {
+    // GPT-4 pricing: $0.03 per 1K input tokens, $0.06 per 1K output tokens
+    // Using average of $0.045 per 1K tokens for estimation
+    return (tokens / 1000) * 0.045;
+  }
 }
 
 // Export singleton instance
 export const openaiService = OpenAIService.getInstance();
-
-// Export types for use in other components
-export type { AIAnalysisRequest, AIAnalysisResponse, DocumentAnalysisRequest, TaxInsightsRequest };

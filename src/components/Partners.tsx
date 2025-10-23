@@ -1,4 +1,3 @@
-import React from 'react'
 
 export default function Partners() {
   const partners = ['Shell', 'Apple', 'Ferrari', 'Stripe', 'Netflix']

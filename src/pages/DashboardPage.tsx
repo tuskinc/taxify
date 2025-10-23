@@ -48,6 +48,7 @@ export default function DashboardPage() {
         onTaxCalendar={() => { navigate('/tax-calendar') }}
         onBudgeting={() => { navigate('/budget') }}
         onInvestments={() => { navigate('/investments') }}
+        onTaxOptimization={() => { navigate('/optimize-tax') }}
       />
     </div>
   )

@@ -1,4 +1,4 @@
-import { BarChart3, Calendar, TrendingUp, DollarSign, Building2, Users, Calculator, Play } from 'lucide-react'
+import { BarChart3, Calendar, TrendingUp, DollarSign, Building2, Users, Calculator, Play, Target } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
 type TaxScenarioId = 'personal' | 'business' | 'combined'
@@ -38,6 +38,7 @@ interface DashboardProps {
   onTaxCalendar?: () => void
   onBudgeting?: () => void
   onInvestments?: () => void
+  onTaxOptimization?: () => void
 }
 
 export default function Dashboard({ 
@@ -49,7 +50,8 @@ export default function Dashboard({
   onConnectCRM,
   onTaxCalendar,
   onBudgeting,
-  onInvestments
+  onInvestments,
+  onTaxOptimization
 }: DashboardProps) {
   const personalTaxableIncome: number = (personalFinances?.annual_income ?? 0) + (personalFinances?.other_income ?? 0) - (personalFinances?.deductions ?? 0)
 
@@ -92,6 +94,13 @@ export default function Dashboard({
       icon: TrendingUp,
       action: onInvestments ?? (() => { console.log('Navigate to investments') }),
       color: 'bg-emerald-500 hover:bg-emerald-600'
+    },
+    {
+      title: 'Optimize My Taxes',
+      description: 'AI-powered tax optimization and savings recommendations',
+      icon: Target,
+      action: onTaxOptimization ?? (() => { console.log('Navigate to tax optimization') }),
+      color: 'bg-blue-500 hover:bg-blue-600'
     }
   ]
 

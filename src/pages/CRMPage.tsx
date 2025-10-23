@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
-import { Building2, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react'
+import { CheckCircle, AlertCircle } from 'lucide-react'
 
 interface CRMProvider {
   id: string

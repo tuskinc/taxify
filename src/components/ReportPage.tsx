@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { FileText, Download, Mail, ArrowLeft, CheckCircle, DollarSign, TrendingUp, Calculator, AlertCircle, Upload, Loader2, Eye, Brain } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { openaiService, type DocumentAnalysisRequest, type TaxInsightsRequest } from '../lib/openai'
 
 
 interface UserProfile {
@@ -216,44 +217,120 @@ export default function ReportPage({
   const processDocuments = async () => {
     setProcessingDocuments(true)
     try {
-      // Simulate AI document processing
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      setMessage('AI is analyzing your documents...')
 
-      // Mock document analysis results
+      // Process each uploaded file with OpenAI
+      const analysisResults = []
+      
+      for (const file of uploadedFiles.filter(f => f.status === 'success')) {
+        try {
+          // For now, we'll simulate file content extraction
+          // In a real implementation, you'd extract text from PDFs, images, etc.
+          const fileContent = `Simulated content from ${file.name}. This would contain the actual extracted text from the document.`
+          
+          const documentRequest: DocumentAnalysisRequest = {
+            fileContent,
+            fileName: file.name,
+            fileType: file.type,
+            userContext: {
+              filingStatus: userProfile.filing_status,
+              dependents: userProfile.dependents,
+              income: personalFinances.annual_income
+            }
+          }
+
+          const analysis = await openaiService.analyzeDocument(documentRequest)
+          analysisResults.push(analysis)
+        } catch (error) {
+          console.error(`Failed to analyze ${file.name}:`, error)
+        }
+      }
+
+      // Combine all analysis results
+      const combinedAnalysis = combineAnalysisResults(analysisResults)
+      
       const documentAnalysis: DocumentAnalysis = {
-        extractedData: {
-          totalIncome: 85000,
-          deductions: 12000,
-          businessExpenses: 15000,
-          additionalInsights: ['High medical expenses detected', 'Charitable donations found']
-        },
-        insights: [
-          'Your documents show $12,000 in medical expenses that qualify for deduction',
-          'Charitable donations of $3,500 were identified for tax benefits',
-          'Business expenses of $15,000 can be deducted from your business income'
-        ],
-        recommendations: [
-          'Consider itemizing deductions instead of taking standard deduction',
-          'Track additional business expenses for next year',
-          'Document all charitable contributions with receipts'
-        ],
-        confidence: 0.87,
+        extractedData: combinedAnalysis.extractedData,
+        insights: combinedAnalysis.insights,
+        recommendations: combinedAnalysis.recommendations,
+        confidence: combinedAnalysis.confidence,
         processedAt: new Date().toISOString()
       }
 
-      // Update report data with document analysis
+      // Generate additional tax insights using OpenAI
+      const taxInsightsRequest: TaxInsightsRequest = {
+        financialData: {
+          income: personalFinances.annual_income,
+          deductions: personalFinances.deductions,
+          businessExpenses: businessFinances?.business_expenses || 0,
+          filingStatus: userProfile.filing_status,
+          dependents: userProfile.dependents
+        },
+        documentAnalysis: documentAnalysis
+      }
+
+      const taxInsights = await openaiService.generateTaxInsights(taxInsightsRequest)
+      
+      // Merge document analysis with tax insights
+      const enhancedAnalysis: DocumentAnalysis = {
+        ...documentAnalysis,
+        insights: [...documentAnalysis.insights, ...taxInsights.insights],
+        recommendations: [...documentAnalysis.recommendations, ...taxInsights.recommendations],
+        confidence: Math.max(documentAnalysis.confidence, taxInsights.confidence)
+      }
+
+      // Update report data with enhanced analysis
       setReportData(prev => prev ? {
         ...prev,
-        documentAnalysis,
+        documentAnalysis: enhancedAnalysis,
         uploadedFiles
       } : null)
 
-      setMessage('Document analysis completed! Review the findings below.')
+      setMessage('AI analysis completed! Review the findings below.')
     } catch (error) {
       console.error('Document processing failed:', error)
       setMessage('Document processing failed. Please try again.')
     } finally {
       setProcessingDocuments(false)
+    }
+  }
+
+  const combineAnalysisResults = (results: any[]) => {
+    if (results.length === 0) {
+      return {
+        extractedData: {},
+        insights: [],
+        recommendations: [],
+        confidence: 0.5
+      }
+    }
+
+    // Combine all insights and recommendations
+    const allInsights = results.flatMap(r => r.insights || [])
+    const allRecommendations = results.flatMap(r => r.recommendations || [])
+    const avgConfidence = results.reduce((sum, r) => sum + (r.confidence || 0.5), 0) / results.length
+
+    // Combine extracted data
+    const combinedExtractedData = results.reduce((acc, r) => {
+      if (r.extractedData) {
+        Object.keys(r.extractedData).forEach(key => {
+          if (typeof r.extractedData[key] === 'number') {
+            acc[key] = (acc[key] || 0) + r.extractedData[key]
+          } else if (Array.isArray(r.extractedData[key])) {
+            acc[key] = [...(acc[key] || []), ...r.extractedData[key]]
+          } else {
+            acc[key] = r.extractedData[key]
+          }
+        })
+      }
+      return acc
+    }, {})
+
+    return {
+      extractedData: combinedExtractedData,
+      insights: [...new Set(allInsights)], // Remove duplicates
+      recommendations: [...new Set(allRecommendations)], // Remove duplicates
+      confidence: avgConfidence
     }
   }
 
@@ -266,8 +343,28 @@ export default function ReportPage({
     
     setDownloading(true)
     try {
-      // Simulate PDF generation
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      setMessage('Generating AI-enhanced report...')
+      
+      // Generate AI-enhanced report content
+      let aiReportContent = ''
+      if (reportData.documentAnalysis) {
+        try {
+          aiReportContent = await openaiService.generateReportContent(
+            {
+              totalTaxableIncome: reportData.totalTaxableIncome,
+              estimatedTaxLiability: reportData.estimatedTaxLiability,
+              taxSavings: reportData.taxSavings,
+              moneySaved: reportData.moneySaved,
+              filingStatus: reportData.filingStatus,
+              dependents: reportData.dependents
+            },
+            reportData.documentAnalysis
+          )
+        } catch (error) {
+          console.error('Failed to generate AI report content:', error)
+          aiReportContent = 'AI-enhanced content generation failed. Using standard report.'
+        }
+      }
       
       // Create a comprehensive report including document analysis
       let reportContent = `
@@ -318,9 +415,18 @@ ${reportData.uploadedFiles.map(file => `- ${file.name} (${(file.size / 1024).toF
 `
       }
 
+      // Add AI-generated content if available
+      if (aiReportContent) {
+        reportContent += `
+
+AI-Enhanced Analysis:
+${aiReportContent}
+`
+      }
+
       reportContent += `
 
-This report was generated using AI-powered tax analysis to help optimize your tax strategy.
+This report was generated using OpenAI-powered tax analysis to help optimize your tax strategy.
       `.trim()
 
       // Create and download file

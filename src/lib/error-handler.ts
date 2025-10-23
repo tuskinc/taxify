@@ -30,11 +30,23 @@ export class ErrorHandler {
       message,
       details,
       timestamp: new Date().toISOString(),
-      userMessage: userMessage || this.getUserFriendlyMessage(code)
+      userMessage: userMessage || this.getDefaultUserMessage(code)
     };
   }
 
   // Get user-friendly error messages
+  getDefaultUserMessage(code: string): string {
+    const messages: Record<string, string> = {
+      'AUTH_ERROR': 'Authentication failed. Please try logging in again.',
+      'VALIDATION_ERROR': 'Please check your input and try again.',
+      'NETWORK_ERROR': 'Network connection failed. Please check your internet connection.',
+      'FILE_ERROR': 'File upload failed. Please try again.',
+      'DATABASE_ERROR': 'Database operation failed. Please try again.',
+      'UNKNOWN_ERROR': 'An unexpected error occurred. Please try again.'
+    };
+    return messages[code] || 'An error occurred. Please try again.';
+  }
+
   // Handle and show error in one call
   handleAndShowError(error: any, context?: string): AppError {
     let appError: AppError;
@@ -57,7 +69,7 @@ export class ErrorHandler {
      this.logError(appError, context);
      this.showError(appError);
      return appError;
-   }
+  }
   // Handle API errors
   handleApiError(error: any): AppError {
     console.error('API Error:', error);
@@ -264,31 +276,7 @@ export class ErrorHandler {
     // Example integration with a toast notification:
     // toast.error(error.userMessage);
   }
-
-  // Handle and show error in one call
-  // Handle and show error in one call
-  handleAndShowError(error: any, context?: string): AppError {
-    let appError: AppError;
-
-    // Detect error type and route to appropriate handler
-    if (error instanceof Error && error.name === 'ValidationError') {
-      appError = this.handleValidationError([error.message]);
-    } else if (error.code && typeof error.code === 'string' &&
-               (error.code.startsWith('PGRST') || error.code.match(/^\d{5}$/))) {
-      // Supabase/Postgres errors have specific code patterns
-      appError = this.handleSupabaseError(error);
-    } else if (error instanceof File || (error.file && error.file instanceof File)) {
-      // File-related errors
-      appError = this.handleFileError(error, error.file);
-    } else {
-      // Default to API error handling for HTTP/network errors
-      appError = this.handleApiError(error);
-    }
- 
-     this.logError(appError, context);
-     this.showError(appError);
-     return appError;
-   }}
+}
 
 // Export singleton instance
 export const errorHandler = ErrorHandler.getInstance();

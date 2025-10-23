@@ -1,17 +1,10 @@
 // src/App.tsx
 
 import { useState, useEffect } from 'react'
-import type { ReactElement, ComponentType } from 'react'
+import type { ReactElement } from 'react'
 
 // … other code …
 
-const ProtectedRoute = ({
-  component: Component
-}: {
-  component: ComponentType
-}): ReactElement => {
-  // existing implementation…
-}
 import type { User } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 // Step-based components removed; routing uses page components only
@@ -32,6 +25,7 @@ import SupportPage from './pages/SupportPage'
 import UploadPage from './pages/UploadPage'
 import CRMPage from './pages/CRMPage'
 import TaxCalendarPage from './pages/TaxCalendarPage'
+import TaxOptimizationPage from './pages/TaxOptimizationPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
@@ -152,6 +146,7 @@ function App() {
         <Route path="/upload" element={<ProtectedRoute component={UploadPage} />} />
         <Route path="/crm" element={<ProtectedRoute component={CRMPage} />} />
         <Route path="/tax-calendar" element={<ProtectedRoute component={TaxCalendarPage} />} />
+        <Route path="/optimize-tax" element={<ProtectedRoute component={TaxOptimizationPage} />} />
 
         {/* Fallback */}
           <Route path="*" element={<NotFoundPage />} />

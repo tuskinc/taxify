@@ -103,14 +103,26 @@ export default function InvestmentsPage() {
   const loadInvestments = async () => {
     try {
       const { data, error } = await supabase
-        .from('investments')
+        .from('business_finances')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (error) throw error
 
-      setInvestments(data || [])
-      calculateSummary(data || [])
+      // Map business_finances data to Investment format
+      const mappedInvestments = (data || []).map((item: any) => ({
+        id: item.id,
+        user_id: item.user_id,
+        asset_type: item.business_type,
+        amount_invested: item.business_expenses || 0,
+        current_value: item.annual_revenue || 0,
+        risk_level: 'medium' as 'low' | 'medium' | 'high',
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      }))
+      
+      setInvestments(mappedInvestments)
+      calculateSummary(mappedInvestments)
     } catch (error) {
       console.error('Failed to load investments:', error)
     }
@@ -162,13 +174,13 @@ export default function InvestmentsPage() {
 
     try {
       const { error } = await supabase
-        .from('investments')
+        .from('business_finances')
         .insert({
           user_id: user.id,
-          asset_type: newInvestment.asset_type,
-          amount_invested: parseFloat(newInvestment.amount_invested),
-          current_value: parseFloat(newInvestment.current_value),
-          risk_level: newInvestment.risk_level,
+          business_name: newInvestment.asset_type,
+          business_type: newInvestment.asset_type,
+          business_expenses: parseFloat(newInvestment.amount_invested),
+          annual_revenue: parseFloat(newInvestment.current_value),
           symbol: newInvestment.symbol || null,
           purchase_date: newInvestment.purchase_date || null
         })
@@ -179,7 +191,7 @@ export default function InvestmentsPage() {
         asset_type: '',
         amount_invested: '',
         current_value: '',
-        risk_level: 'medium',
+        risk_level: 'medium' as 'low' | 'medium' | 'high',
         symbol: '',
         purchase_date: new Date().toISOString().split('T')[0]
       })
@@ -382,7 +394,7 @@ export default function InvestmentsPage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={(entry: any) => `${entry.name} ${(entry.percent * 100).toFixed(0)}%`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"

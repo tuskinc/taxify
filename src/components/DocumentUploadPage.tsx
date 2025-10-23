@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Upload, Camera, FileText, Building2, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react'
 
