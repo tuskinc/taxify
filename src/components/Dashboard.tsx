@@ -1,58 +1,106 @@
-import { } from 'react'
-import { BarChart3, FileText, Calendar, TrendingUp, DollarSign, Building2, Users, Calculator } from 'lucide-react'
+import { BarChart3, Calendar, TrendingUp, DollarSign, Building2, Users, Calculator, Play, Target } from 'lucide-react'
+import type { User } from '@supabase/supabase-js'
+
+type TaxScenarioId = 'personal' | 'business' | 'combined'
+interface TaxScenario { id: TaxScenarioId; name: string; description: string }
+
+interface PersonalFinance {
+  annual_income?: number
+  other_income?: number
+  deductions?: number
+  credits?: number
+}
+
+interface BusinessFinance {
+  annual_revenue?: number
+  business_expenses?: number
+}
+
+interface UserProfile {
+  id?: string
+  email?: string
+  country?: string
+  filing_status?: string
+  birth_date?: string
+  dependents?: number
+  spouse_income?: number
+  tax_scenarios?: TaxScenario[]
+}
 
 interface DashboardProps {
-  user: any
-  userProfile: any
-  personalFinances: any
-  businessFinances?: any
-  onStartNewAnalysis: () => void
+  user?: User | null
+  userProfile?: UserProfile | null
+  personalFinances?: PersonalFinance | null
+  businessFinances?: BusinessFinance | null
+  onStartNewAnalysis?: () => void
+  onGenerateReport?: () => void
+  onConnectCRM?: () => void
+  onTaxCalendar?: () => void
+  onBudgeting?: () => void
+  onInvestments?: () => void
+  onTaxOptimization?: () => void
 }
 
 export default function Dashboard({ 
   userProfile, 
   personalFinances, 
   businessFinances, 
-  onStartNewAnalysis 
+  onStartNewAnalysis,
+  onGenerateReport,
+  onConnectCRM,
+  onTaxCalendar,
+  onBudgeting,
+  onInvestments,
+  onTaxOptimization
 }: DashboardProps) {
-  const personalTaxableIncome = personalFinances 
-    ? personalFinances.annual_income + personalFinances.other_income - personalFinances.deductions
-    : 0
+  const personalTaxableIncome: number = (personalFinances?.annual_income ?? 0) + (personalFinances?.other_income ?? 0) - (personalFinances?.deductions ?? 0)
 
-  const businessNetIncome = businessFinances 
-    ? businessFinances.annual_revenue - businessFinances.business_expenses 
-    : 0
+  const businessNetIncome: number = (businessFinances?.annual_revenue ?? 0) - (businessFinances?.business_expenses ?? 0)
 
-  const totalTaxableIncome = personalTaxableIncome + businessNetIncome
+  const totalTaxableIncome: number = personalTaxableIncome + businessNetIncome
 
   const quickActions = [
     {
-      title: 'New Tax Analysis',
-      description: 'Start a fresh tax analysis with updated information',
-      icon: Calculator,
-      action: onStartNewAnalysis,
-      color: 'bg-blue-500 hover:bg-blue-600'
+      title: 'Connect CRM',
+      description: 'Connect your CRM system for automatic data sync',
+      icon: Building2,
+      action: onConnectCRM ?? (() => { console.log('Navigate to CRM connection') }),
+      color: 'bg-green-500 hover:bg-green-600'
     },
     {
-      title: 'View Reports',
-      description: 'Access your previous tax analysis reports',
-      icon: FileText,
-      action: () => console.log('View reports'),
-      color: 'bg-green-500 hover:bg-green-600'
+      title: 'Generate Report',
+      description: 'Generate your personalized tax analysis report',
+      icon: BarChart3,
+      action: onGenerateReport ?? (() => { /* no-op */ }),
+      color: 'bg-purple-500 hover:bg-purple-600'
     },
     {
       title: 'Tax Calendar',
       description: 'View important tax dates and deadlines',
       icon: Calendar,
-      action: () => console.log('View calendar'),
-      color: 'bg-purple-500 hover:bg-purple-600'
+      action: onTaxCalendar ?? (() => { console.log('View calendar') }),
+      color: 'bg-orange-500 hover:bg-orange-600'
     },
     {
-      title: 'Tax Tips',
-      description: 'Get personalized tax optimization tips',
+      title: 'Budgeting',
+      description: 'Track income, expenses, and savings',
+      icon: DollarSign,
+      action: onBudgeting ?? (() => { console.log('Navigate to budgeting') }),
+      color: 'bg-indigo-500 hover:bg-indigo-600'
+    },
+    {
+      title: 'Investments',
+      description: 'Manage your investment portfolio',
       icon: TrendingUp,
-      action: () => console.log('View tips'),
-      color: 'bg-orange-500 hover:bg-orange-600'
+      action: onInvestments ?? (() => { console.log('Navigate to investments') }),
+      color: 'bg-emerald-500 hover:bg-emerald-600'
+    },
+    {
+      title: 'Optimize My Taxes',
+      description: 'AI-powered tax optimization and savings recommendations',
+      icon: Target,
+      action: onTaxOptimization ?? (() => { console.log('Navigate to tax optimization') }),
+      color: 'bg-blue-500 hover:bg-blue-600'
     }
   ]
 
@@ -102,21 +150,30 @@ export default function Dashboard({
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
               <div className="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">Z</span>
+                <span className="text-white font-bold text-lg">T</span>
               </div>
               <div className="ml-3">
-                <h1 className="text-2xl font-bold text-gray-900">Zin Dashboard</h1>
-                <p className="text-sm text-gray-600">Welcome back, {userProfile?.email}</p>
+                <h1 className="text-2xl font-bold text-gray-900">Taxify Dashboard</h1>
+                <p className="text-sm text-gray-600">Welcome back, {userProfile?.email ?? 'Guest'}</p>
               </div>
             </div>
-            <div className="flex items-center btn-row">
+            <div className="flex items-center btn-row space-x-3">
               <button
-                onClick={onStartNewAnalysis}
+                onClick={onGenerateReport}
                 className="btn btn-primary"
               >
                 <Calculator className="h-4 w-4 mr-2" />
-                New Analysis
+                Generate Report
               </button>
+              {onStartNewAnalysis && (
+                <button
+                  onClick={onStartNewAnalysis}
+                  className="btn btn-ghost"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Start New Analysis
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -157,7 +214,7 @@ export default function Dashboard({
             </div>
           </div>
 
-          {businessFinances && (
+          {(businessFinances?.annual_revenue ?? 0) > 0 && (
             <div className="card overflow-hidden">
               <div className="card-body">
                 <div className="flex items-center">
@@ -185,7 +242,7 @@ export default function Dashboard({
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Tax Scenarios</dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      {userProfile?.tax_scenarios?.length || 0}
+                      {userProfile?.tax_scenarios?.length ?? 0}
                     </dd>
                   </dl>
                 </div>
@@ -208,7 +265,7 @@ export default function Dashboard({
                     <button
                       key={index}
                       onClick={action.action}
-                      className={`${action.color} text-white p-4 rounded-lg text-left min-h-9`}
+                      className={`${action.color} text-white p-4 rounded-lg text-left min-h-[36px]`}
                     >
                       <div className="flex items-center">
                         <Icon className="h-6 w-6 mr-3" />

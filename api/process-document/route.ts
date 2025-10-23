@@ -1,9 +1,10 @@
 /// <reference types="node" />
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { mapToZiamTaxModel } from '../../src/lib/mapping';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import pdf from 'pdf-parse';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { parse } from 'csv-parse/sync';
 import { docxParser } from 'docx-parser';
 
@@ -31,30 +32,41 @@ export async function POST(request: Request) {
       throw new Error(`Failed to download file: ${response.statusText}`);
     }
 
-    const buffer = Buffer.from(await response.arrayBuffer());
+    const arrayBuffer = await response.arrayBuffer();
+    const nodeBuffer = Buffer.from(arrayBuffer);
     let textContent = '';
 
     // 2. Process the file based on its type
     if (fileType === 'application/pdf') {
-      const pdfData = await pdf(buffer);
+      const pdfData = await pdf(nodeBuffer);
       textContent = pdfData.text;
     } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       textContent = await new Promise((resolve, reject) => {
-        docxParser(buffer, (err: Error | null, text?: string) => {
+        docxParser(nodeBuffer, (err: Error | null, text?: string) => {
           if (err) reject(err);
           else resolve(text || '');
         });
       });
     } else if (fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-      const workbook = XLSX.read(buffer);
-      textContent = workbook.SheetNames
-        .map(sheetName => {
-          const worksheet = workbook.Sheets[sheetName];
-          return XLSX.utils.sheet_to_csv(worksheet);
-        })
-        .join('\n\n');
+      // Parse XLSX using exceljs to mitigate known vulnerabilities
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const csvParts: string[] = [];
+      workbook.eachSheet(worksheet => {
+        const rows: string[] = [];
+        worksheet.eachRow({ includeEmpty: false }, row => {
+          const values = row.values as Array<string | number | boolean | null>;
+          // exceljs row.values is 1-indexed; normalize and stringify safely
+          const normalized = values
+            .slice(1)
+            .map(v => (v === null || v === undefined ? '' : String(v).replace(/\n/g, ' ')));
+          rows.push(normalized.join(','));
+        });
+        csvParts.push(rows.join('\n'));
+      });
+      textContent = csvParts.join('\n\n');
     } else if (fileType === 'text/csv') {
-      const records = parse(buffer.toString(), {
+      const records = parse(nodeBuffer.toString(), {
         columns: true,
         skip_empty_lines: true,
       }) as Record<string, unknown>[];
@@ -65,11 +77,15 @@ export async function POST(request: Request) {
 
     // 3. Extract financial data using Claude
     const extractedData = await extractFinancialData(textContent);
+    const mapped = mapToZiamTaxModel(extractedData as Record<string, unknown>, {
+      method: 'upload',
+      reference: fileName,
+    });
 
     // 4. Return the extracted data
     return NextResponse.json({ 
       success: true, 
-      data: extractedData 
+      data: mapped 
     });
 
   } catch (error) {

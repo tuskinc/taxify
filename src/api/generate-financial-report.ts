@@ -45,7 +45,7 @@ async function fetchReportData(userId: string): Promise<FinancialReportData> {
   if (profileError) throw profileError;
 
   // Fetch personal finances
-  const { data: personalFinances, error: personalError } = await supabase
+  const { data: personalFinances } = await supabase
     .from('personal_finances')
     .select('*')
     .eq('user_id', userId)
@@ -78,7 +78,7 @@ async function fetchReportData(userId: string): Promise<FinancialReportData> {
   }
 
   // Fetch comprehensive analysis
-  const { data: comprehensiveAnalysis, error: analysisError } = await supabase
+  const { data: comprehensiveAnalysis } = await supabase
     .from('comprehensive_analyses')
     .select('*')
     .eq('user_id', userId)
@@ -370,7 +370,7 @@ function generateBusinessAnalysis(doc: jsPDF, data: FinancialReportData) {
   doc.text('• Plan for quarterly estimated tax payments', 50, 280);
 }
 
-function generateCombinedStrategy(doc: jsPDF, data: FinancialReportData) {
+function generateCombinedStrategy(doc: jsPDF, _data: FinancialReportData) {
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(31, 41, 55);
@@ -409,7 +409,7 @@ function generateCombinedStrategy(doc: jsPDF, data: FinancialReportData) {
   doc.text('• State and local tax deductions', 50, 250);
 }
 
-function generateCalendarAndChecklist(doc: jsPDF, data: FinancialReportData) {
+function generateCalendarAndChecklist(doc: jsPDF, _data: FinancialReportData) {
   // Tax Calendar
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');

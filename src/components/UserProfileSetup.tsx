@@ -42,15 +42,13 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
 
     try {
       const { error } = await supabase
-        .from('users')
+        .from('user_profiles')
         .insert({
-          id: user.id,
-          email: user.email,
+          user_id: user.id,
           country: data.country,
           filing_status: data.filing_status,
           birth_date: data.birth_date,
           dependents: data.dependents,
-          spouse_income: data.spouse_income,
         })
 
       if (error) throw error
@@ -186,7 +184,7 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-xl">Z</span>
+            <span className="text-white font-bold text-xl">T</span>
           </div>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
             Complete Your Profile

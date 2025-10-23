@@ -1,180 +1,116 @@
+// src/App.tsx
+
 import { useState, useEffect } from 'react'
+import type { ReactElement } from 'react'
+
+// … other code …
+
+import type { User } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
-import AuthWrapper from './components/AuthWrapper'
-import UserProfileSetup from './components/UserProfileSetup'
-import TaxScenarioSelector from './components/TaxScenarioSelector'
-import PersonalFinanceForm from './components/PersonalFinanceForm'
-import BusinessFinanceForm from './components/BusinessFinanceForm'
-import ComprehensiveAnalysisReport from './components/ComprehensiveAnalysisReport'
-import Dashboard from './components/Dashboard'
-import DocumentUpload from './components/DocumentUpload'
-import LandingPage from './components/LandingPage'
-
-export interface UserProfile {
-  id: string
-  email: string
-  country: string
-  filing_status: string
-  birth_date: string
-  dependents: number
-  spouse_income: number
-  tax_scenarios: string[]
-  created_at: string
-  updated_at: string
-}
-
-export interface PersonalFinances {
-  id: string
-  user_id: string
-  annual_income: number
-  deductions: number
-  credits: number
-  other_income: number
-  created_at: string
-  updated_at: string
-}
-
-export interface BusinessFinances {
-  id: string
-  user_id: string
-  business_name: string
-  business_type: string
-  annual_revenue: number
-  business_expenses: number
-  created_at: string
-  updated_at: string
-}
-
-export type TaxScenario = 'personal' | 'business' | 'combined'
-
-type Step = 'landing' | 'auth' | 'profile' | 'scenario' | 'personal' | 'business' | 'analysis' | 'dashboard' | 'upload'
+// Step-based components removed; routing uses page components only
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
+import SignUpPage from './pages/SignUpPage'
+import OnboardingPage from './pages/OnboardingPage'
+import DashboardPage from './pages/DashboardPage'
+import BudgetingPage from './pages/BudgetingPage'
+import InvestmentsPage from './pages/InvestmentsPage'
+import TaxSummaryPage from './pages/TaxSummaryPage'
+import TaxScenariosPage from './pages/TaxScenariosPage'
+import ReportsPage from './pages/ReportsPage'
+import ProfilePage from './pages/ProfilePage'
+import PaymentPage from './pages/PaymentPage'
+import SupportPage from './pages/SupportPage'
+import UploadPage from './pages/UploadPage'
+import CRMPage from './pages/CRMPage'
+import TaxCalendarPage from './pages/TaxCalendarPage'
+import TaxOptimizationPage from './pages/TaxOptimizationPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [currentStep, setCurrentStep] = useState<Step>('landing')
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
-  const [personalFinances, setPersonalFinances] = useState<PersonalFinances | null>(null)
-  const [businessFinances, setBusinessFinances] = useState<BusinessFinances | null>(null)
 
   useEffect(() => {
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        checkUserProfile(session.user.id)
+    console.log('App mounted')
+    let isMounted = true
+    // Check for existing session with a timeout fallback
+    let settled = false
+    const timeoutId = setTimeout(() => {
+      if (!settled && isMounted) {
+        console.warn('getSession exceeded 5000ms; continuing without session')
+        setLoading(false)
       }
-      setLoading(false)
-    })
+    }, 5000)
+
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        settled = true
+        if (error) {
+          console.error('Failed to get session', error)
+        }
+        if (!isMounted) return
+        setUser(session?.user ?? null)
+      } catch (error) {
+        settled = true
+        console.error('Failed to get session', error)
+      } finally {
+        if (isMounted) setLoading(false)
+        clearTimeout(timeoutId)
+      }
+    }
+    void initSession()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (event, session) => {
+        console.log('🔐 Auth state changed:', event)
+        if (!isMounted) return
         setUser(session?.user ?? null)
-        if (session?.user) {
-          await checkUserProfile(session.user.id)
+        if (!session?.user) {
+          console.log('❌ No user session')
         } else {
-          setCurrentStep('landing')
-          setUserProfile(null)
-          setPersonalFinances(null)
-          setBusinessFinances(null)
+          console.log('✅ User authenticated')
         }
         setLoading(false)
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => { 
+      isMounted = false
+      subscription.unsubscribe()
+      clearTimeout(timeoutId)
+    }
   }, [])
 
-  const checkUserProfile = async (userId: string) => {
-    try {
-      const { data: profile, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle()
-
-      if (error) throw error
-
-      if (profile) {
-        setUserProfile(profile)
-        
-        // Check if user has completed all steps
-        if (profile.tax_scenarios && profile.tax_scenarios.length > 0) {
-          // Check for personal finances
-          const { data: personalData } = await supabase
-            .from('personal_finances')
-            .select('*')
-            .eq('user_id', userId)
-            .single()
-
-          if (personalData) {
-            setPersonalFinances(personalData)
-          }
-
-          // Check for business finances if needed
-          if (profile.tax_scenarios.includes('business') || profile.tax_scenarios.includes('combined')) {
-            const { data: businessData } = await supabase
-              .from('business_finances')
-              .select('*')
-              .eq('user_id', userId)
-              .single()
-
-            if (businessData) {
-              setBusinessFinances(businessData)
-            }
-          }
-
-          setCurrentStep('dashboard')
-        } else {
-          setCurrentStep('scenario')
-        }
-      } else {
-        // No profile row yet → collect profile
-        setCurrentStep('profile')
-      }
-    } catch (error) {
-      console.error('Error checking user profile:', error)
-      setCurrentStep('profile')
+  // Safety: never allow loading to persist forever
+  useEffect(() => {
+    if (!loading) return
+    const id = setTimeout(() => {
+      console.warn('Loading exceeded 6000ms; forcing UI render fallback')
+      setLoading(false)
+    }, 6000)
+    return () => { clearTimeout(id) }
+  }, [loading])
+  // Private route guard
+  const ProtectedRoute = ({ component: Component }: { component: React.ComponentType }): ReactElement => {
+    if (loading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading Taxify...</p>
+          </div>
+        </div>
+      )
     }
+    if (!user) return <Navigate to="/login" replace />
+    return <Component />
   }
 
-  const handleProfileComplete = (profile: UserProfile) => {
-    setUserProfile(profile)
-    setCurrentStep('scenario')
-  }
 
-  const handleScenarioComplete = () => {
-    setCurrentStep('personal')
-  }
-
-  const handlePersonalComplete = (finances: PersonalFinances) => {
-    setPersonalFinances(finances)
-    if (userProfile?.tax_scenarios?.includes('business') || userProfile?.tax_scenarios?.includes('combined')) {
-      setCurrentStep('business')
-    } else {
-      setCurrentStep('analysis')
-    }
-  }
-
-  const handleBusinessComplete = (finances: BusinessFinances) => {
-    setBusinessFinances(finances)
-    setCurrentStep('analysis')
-  }
-
-  const handleAnalysisComplete = () => {
-    setCurrentStep('dashboard')
-  }
-
-  const handleBackToDashboard = () => {
-    setCurrentStep('dashboard')
-  }
-
-  const handleDocumentUpload = (data: any) => {
-    // Process uploaded document data
-    console.log('Document data received:', data)
-    setCurrentStep('analysis')
-  }
 
   if (loading) {
     return (
@@ -188,81 +124,35 @@ function App() {
   }
 
   return (
+    <BrowserRouter>
     <div className="min-h-screen bg-[#fdf9f6]">
-      {currentStep === 'landing' && (
-        <LandingPage onGetStarted={() => setCurrentStep('auth')} />
-      )}
-      {currentStep === 'auth' && (
-        <AuthWrapper onAuthSuccess={async () => {
-          const { data } = await supabase.auth.getUser()
-          const uid = data.user?.id
-          if (uid) {
-            await checkUserProfile(uid)
-          } else {
-            // If still no user, stay on auth
-            setCurrentStep('auth')
-          }
-        }} />
-      )}
-      
-      {currentStep === 'profile' && user && (
-        <UserProfileSetup 
-          user={user} 
-          onComplete={handleProfileComplete}
-        />
-      )}
-      
-      {currentStep === 'scenario' && userProfile && (
-        <TaxScenarioSelector 
-          userProfile={userProfile}
-          onComplete={handleScenarioComplete}
-        />
-      )}
-      
-      {currentStep === 'personal' && userProfile && (
-        <PersonalFinanceForm 
-          userProfile={userProfile}
-          onComplete={handlePersonalComplete}
-        />
-      )}
-      
-      {currentStep === 'business' && userProfile && (
-        <BusinessFinanceForm 
-          userProfile={userProfile}
-          onComplete={handleBusinessComplete}
-        />
-      )}
-      
-      {currentStep === 'upload' && userProfile && (
-        <DocumentUpload 
-          user={user}
-          onDataExtracted={handleDocumentUpload}
-          onBack={() => setCurrentStep('scenario')}
-        />
-      )}
-      
-      {currentStep === 'analysis' && userProfile && personalFinances && (
-        <ComprehensiveAnalysisReport 
-          user={user}
-          userProfile={userProfile}
-          personalFinances={personalFinances}
-          businessFinances={businessFinances}
-          onComplete={handleAnalysisComplete}
-          onBackToDashboard={handleBackToDashboard}
-        />
-      )}
-      
-      {currentStep === 'dashboard' && userProfile && (
-        <Dashboard 
-          user={user}
-          userProfile={userProfile}
-          personalFinances={personalFinances}
-          businessFinances={businessFinances}
-          onStartNewAnalysis={() => setCurrentStep('analysis')}
-          onUploadDocuments={() => setCurrentStep('upload')}
-        />
-      )}
+        <Routes>
+        {/* Public routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
+
+        {/* Private routes */}
+        <Route path="/dashboard" element={<ProtectedRoute component={DashboardPage} />} />
+        <Route path="/budget" element={<ProtectedRoute component={BudgetingPage} />} />
+        <Route path="/investments" element={<ProtectedRoute component={InvestmentsPage} />} />
+        <Route path="/tax-summary" element={<ProtectedRoute component={TaxSummaryPage} />} />
+        <Route path="/scenarios" element={<ProtectedRoute component={TaxScenariosPage} />} />
+        <Route path="/reports" element={<ProtectedRoute component={ReportsPage} />} />
+        <Route path="/profile" element={<ProtectedRoute component={ProfilePage} />} />
+        <Route path="/payment" element={<ProtectedRoute component={PaymentPage} />} />
+        <Route path="/support" element={<ProtectedRoute component={SupportPage} />} />
+        <Route path="/upload" element={<ProtectedRoute component={UploadPage} />} />
+        <Route path="/crm" element={<ProtectedRoute component={CRMPage} />} />
+        <Route path="/tax-calendar" element={<ProtectedRoute component={TaxCalendarPage} />} />
+        <Route path="/optimize-tax" element={<ProtectedRoute component={TaxOptimizationPage} />} />
+
+        {/* Fallback */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
     </div>
+    </BrowserRouter>
   )
 }
 
