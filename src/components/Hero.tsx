@@ -7,7 +7,7 @@ interface HeroProps {
 export default function Hero({ onGetStarted }: HeroProps) {
   return (
     <section id="home" className="bg-[#fdf9f6]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 grid md:grid-cols-2 gap-10 items-center">
+      <div className="max-w-7xl mx-auto pl-4 pr-4 sm:px-6 lg:px-8 py-16 sm:py-24 grid md:grid-cols-2 gap-10 items-center">
         <div>
           <h1 className="text-4xl sm:text-5xl font-serif tracking-tight text-[#111827]">
             Personalized tax planning built for you

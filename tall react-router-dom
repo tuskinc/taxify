@@ -1,0 +1,225 @@
+import { useState, useEffect } from 'react'
+import type { User } from '@supabase/supabase-js'
+import { supabase } from './lib/supabase'
+import AuthWrapper from './components/AuthWrapper'
+import UserProfileSetup from './components/UserProfileSetup'
+import TaxScenarioSelector from './components/TaxScenarioSelector'
+import PersonalFinanceForm from './components/PersonalFinanceForm'
+import BusinessFinanceForm from './components/BusinessFinanceForm'
+import ComprehensiveAnalysisReport from './components/ComprehensiveAnalysisReport'
+import Dashboard from './components/Dashboard'
+import DocumentUploadPage from './components/DocumentUploadPage'
+import ReportPage from './components/ReportPage'
+import Onboarding from './components/Onboarding'
+import LandingPage from './components/LandingPage'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HomePage, LoginPage, SignUpPage, OnboardingPage, DashboardPage, TaxScenariosPage, ReportsPage, ProfilePage, PaymentPage, SupportPage, NotFoundPage, BudgetingPage, InvestmentsPage, TaxSummaryPage } from './pages'
+import LoginPage from './pages/LoginPage'
+import SignUpPage from './pages/SignUpPage'
+import OnboardingPage from './pages/OnboardingPage'
+
+export interface UserProfile {
+  id: string
+  email: string
+  country: string
+  filing_status: string
+  birth_date: string
+  dependents: number
+  spouse_income: number
+  tax_scenarios: TaxScenario[]
+  created_at: string
+  updated_at: string
+}
+
+export interface PersonalFinances {
+  id: string
+  user_id: string
+  annual_income: number
+  deductions: number
+  credits: number
+  other_income: number
+  created_at: string
+  updated_at: string
+}
+
+export interface BusinessFinances {
+  id: string
+  user_id: string
+  business_name: string
+  business_type: string
+  annual_revenue: number
+  business_expenses: number
+  created_at: string
+  updated_at: string
+}
+
+export type TaxScenarioId = 'personal' | 'business' | 'combined'
+
+export interface TaxScenario {
+  id: TaxScenarioId
+  name: string
+  description: string
+}
+
+const SCENARIOS: Record<TaxScenarioId, TaxScenario> = {
+  personal: {
+    id: 'personal',
+    name: 'Personal & Family Taxes',
+    description: 'Analyze personal income, deductions, and family tax situation',
+  },
+  business: {
+    id: 'business',
+    name: 'Business Taxes',
+    description: 'Optimize business tax strategy and compliance',
+  },
+  combined: {
+    id: 'combined',
+    name: 'Combined Analysis',
+    description: 'Comprehensive analysis of both personal and business finances',
+  },
+}
+
+type Step = 'landing' | 'onboarding' | 'auth' | 'profile' | 'scenario' | 'personal' | 'business' | 'analysis' | 'dashboard' | 'upload' | 'document_upload' | 'report'
+
+function App() {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [currentStep, setCurrentStep] = useState<Step>('landing')
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [personalFinances, setPersonalFinances] = useState<PersonalFinances | null>(null)
+  const [businessFinances, setBusinessFinances] = useState<BusinessFinances | null>(null)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  useEffect(() => {
+    console.log('App mounted')
+    let isMounted = true
+    // Check for existing session with a timeout fallback
+    let settled = false
+    const timeoutId = setTimeout(() => {
+      if (!settled && isMounted) {
+        console.warn('getSession exceeded 5000ms; continuing without session')
+        setLoading(false)
+      }
+    }, 5000)
+
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        settled = true
+        if (error) {
+          console.error('Failed to get session', error)
+        }
+        if (!isMounted) return
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          // Optimistic navigation to prevent UI stall; profile check will refine the step
+          setCurrentStep((prev) => (prev === 'landing' || prev === 'onboarding' || prev === 'auth' ? 'dashboard' : prev))
+          await checkUserProfile(session.user.id)
+        }
+      } catch (error) {
+        settled = true
+        console.error('Failed to get session', error)
+      } finally {
+        if (isMounted) setLoading(false)
+        clearTimeout(timeoutId)
+      }
+    }
+    void initSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        const sessionEmail = session?.user?.email
+        console.log('🔐 Auth state changed:', event, sessionEmail)
+        if (!isMounted) return
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          // Optimistic navigation to avoid being stuck on auth screen
+          setCurrentStep((prev) => (prev === 'landing' || prev === 'onboarding' || prev === 'auth' ? 'dashboard' : prev))
+          console.log('✅ User authenticated, checking profile...')
+          await checkUserProfile(session.user.id)
+        } else {
+          console.log('❌ No user session, resetting to landing')
+          setCurrentStep('landing')
+          setUserProfile(null)
+          setPersonalFinances(null)
+          setBusinessFinances(null)
+        }
+        setLoading(false)
+      }
+    )
+
+    return () => { 
+      isMounted = false
+      subscription.unsubscribe()
+      clearTimeout(timeoutId)
+    }
+  }, [])
+
+  // Safety: never allow loading to persist forever
+  useEffect(() => {
+    if (!loading) return
+    const id = setTimeout(() => {
+      console.warn('Loading exceeded 6000ms; forcing UI render fallback')
+      setLoading(false)
+    }, 6000)
+    return () => { clearTimeout(id) }
+  }, [loading])
+
+  const checkUserProfile = async (userId: string) => {
+    try {
+      console.log('🔍 Checking user profile for:', userId)
+      // reset any previous fetch error before attempting a fresh load
+      setFetchError(null)
+      const { data: profile, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle()
+
+      if (error) {
+        console.error('❌ Error fetching profile:', error)
+        throw error
+      }
+
+      console.log('📊 Profile data:', profile)
+      console.log('🔍 Profile exists:', !!profile)
+
+      if (profile) {
+        console.log('✅ Profile found, normalizing data...')
+        const p = profile as Record<string, unknown>
+        const toStringOrEmpty = (v: unknown) => (typeof v === 'string' ? v : '')
+        const toNumberOrZero = (v: unknown) => (typeof v === 'number' ? v : 0)
+        const toScenarioArray = (v: unknown): TaxScenario[] => {
+          if (Array.isArray(v)) {
+            // Accept either array of ids or array of objects
+            const result: TaxScenario[] = []
+            for (const item of v) {
+              if (typeof item === 'string') {
+                if (item in SCENARIOS) result.push(SCENARIOS[item as TaxScenarioId])
+              } else if (item && typeof item === 'object' && 'id' in item) {
+                const obj = item as Partial<TaxScenario>
+                const id = typeof obj.id === 'string' ? obj.id : undefined
+              if (id && (id in SCENARIOS)) {
+                  // merge with canonical to ensure required fields
+                  result.push({ ...SCENARIOS[id], ...obj })
+                }
+              }
+            }
+            return result
+          }
+          return []
+        }
+        const normalizedProfile: UserProfile = {
+          id: toStringOrEmpty(p.id),
+          email: toStringOrEmpty(p.email),
+          country: toStringOrEmpty(p.country) || 'US',
+          filing_status: toStringOrEmpty(p.filing_status) || 'single',
+          birth_date: toStringOrEmpty(p.birth_date),
+          dependents: toNumberOrZero(p.dependents),
+          spouse_income: toNumberOrZero(p.spouse_income),
+          tax_scenarios: toScenarioArray(p.tax_scenarios),
+          created_at: toStringOrEmpty(p.created_at) || new Date().toISOString(),
+          updated_at: toStringOrEmpty(p.updated_at) || new Date().toISOString(),
+        }
+        console.log('✅ N

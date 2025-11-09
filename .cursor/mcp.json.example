@@ -1,4 +1,4 @@
-﻿{
+{
   "mcpServers": {
     "supabase": {
       "command": "cmd",
@@ -13,3 +13,7 @@
     }
   }
 }
+
+NOTE: Replace YOUR_SUPABASE_ACCESS_TOKEN_HERE with your actual Supabase access token.
+This file should never be committed to version control.
+

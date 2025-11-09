@@ -41,6 +41,10 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
     setError('')
 
     try {
+      if (!user || !user.id || !user.email) {
+        throw new Error('User information is missing')
+      }
+
       const { error } = await supabase
         .from('users')
         .insert({
@@ -182,7 +186,7 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 pl-4 pr-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">

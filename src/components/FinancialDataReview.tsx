@@ -99,14 +99,14 @@ export default function FinancialDataReview({
         <button
           type="button"
           onClick={onBack}
-          className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="pl-4 pr-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           Back
         </button>
         <button
           type="button"
           onClick={() => onSave(formData)}
-          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+          className="pl-4 pr-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
         >
           Save Changes
         </button>

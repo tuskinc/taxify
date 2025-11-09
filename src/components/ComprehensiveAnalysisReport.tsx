@@ -1,13 +1,25 @@
 import { useState } from 'react'
 import { apiClient } from '../api/client'
 import { Download, Printer, ArrowLeft, AlertCircle, CheckCircle, TrendingUp, Calculator, DollarSign } from 'lucide-react'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+
+interface PersonalFinances {
+  annual_income: number
+  other_income: number
+  deductions: number
+  credits: number
+}
+
+interface BusinessFinances {
+  business_name: string
+  annual_revenue: number
+  business_expenses: number
+}
 
 interface ComprehensiveAnalysisReportProps {
-  user: any
-  userProfile: any
-  personalFinances: any
-  businessFinances?: any
-  onComplete: () => void
+  user: SupabaseUser | null
+  personalFinances: PersonalFinances
+  businessFinances?: BusinessFinances | null
   onBackToDashboard: () => void
 }
 
@@ -21,13 +33,19 @@ export default function ComprehensiveAnalysisReport({
   const [downloadError, setDownloadError] = useState('')
 
   const handleDownload = async () => {
+    if (!user?.id) {
+      setDownloadError('User information is missing')
+      return
+    }
+
     setDownloading(true)
     setDownloadError('')
 
     try {
       await apiClient.downloadReport(user.id)
-    } catch (error: any) {
-      setDownloadError(error.message || 'Failed to download report')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to download report'
+      setDownloadError(errorMessage)
     } finally {
       setDownloading(false)
     }
@@ -102,15 +120,15 @@ export default function ComprehensiveAnalysisReport({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 pl-4 pr-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white shadow rounded-lg mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-blue-100/50 mb-6">
+          <div className="px-6 py-4 border-b border-blue-100/50">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">Z</span>
+                <div className="h-10 w-10 bg-[#1E90FF] rounded-full flex items-center justify-center shadow-md">
+                  <span className="text-white font-bold text-lg">T</span>
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">Tax Analysis Report</h1>
@@ -120,14 +138,14 @@ export default function ComprehensiveAnalysisReport({
               <div className="flex space-x-2">
                 <button
                   onClick={onBackToDashboard}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center pl-3 pr-3 py-2 border border-blue-100/50 shadow-sm text-sm leading-4 font-medium rounded-2xl text-[#1E90FF] bg-[#E0F0FF] hover:bg-[#D1E9FF] focus:outline-none transition-all duration-200"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Dashboard
                 </button>
                 <button
                   onClick={handlePrint}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center pl-3 pr-3 py-2 border border-blue-100/50 shadow-sm text-sm leading-4 font-medium rounded-2xl text-[#1E90FF] bg-[#E0F0FF] hover:bg-[#D1E9FF] focus:outline-none transition-all duration-200"
                 >
                   <Printer className="h-4 w-4 mr-2" />
                   Print
@@ -135,7 +153,7 @@ export default function ComprehensiveAnalysisReport({
                 <button
                   onClick={handleDownload}
                   disabled={downloading}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center pl-3 pr-3 py-2.5 border border-transparent text-sm leading-4 font-medium rounded-2xl text-white bg-[#1E90FF] hover:bg-[#1C7ED6] focus:outline-none shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   {downloading ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -150,7 +168,7 @@ export default function ComprehensiveAnalysisReport({
         </div>
 
         {downloadError && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4">
             <div className="flex">
               <AlertCircle className="h-5 w-5 text-red-400" />
               <div className="ml-3">
@@ -162,17 +180,17 @@ export default function ComprehensiveAnalysisReport({
         )}
 
         {/* Executive Summary */}
-        <div className="bg-white shadow rounded-lg mb-6">
+        <div className="bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-blue-100/50 mb-6">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">Executive Summary</h2>
           </div>
           <div className="px-6 py-4">
             {/* Tax Impact Display */}
-            <div className="bg-gradient-to-r from-red-50 to-green-50 border border-gray-200 rounded-lg p-6 mb-6">
+            <div className="bg-gradient-to-r from-red-50 to-green-50 border border-gray-200 rounded-2xl p-6 mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Your Tax Impact Analysis</h3>
               <div className="space-y-4">
                 {/* Without tax cuts */}
-                <div className="bg-red-100 border-l-4 border-red-500 p-4 rounded-r-lg">
+                <div className="bg-red-100 border-l-4 border-red-500 p-4 rounded-r-2xl">
                   <div className="flex items-center justify-between">
                     <span className="text-red-800 font-medium">Without tax cuts, you would have paid:</span>
                     <span className="text-2xl font-bold text-red-900">${taxBeforeCuts.toLocaleString()}</span>
@@ -180,7 +198,7 @@ export default function ComprehensiveAnalysisReport({
                 </div>
                 
                 {/* With tax cuts */}
-                <div className="bg-blue-100 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                <div className="bg-[#E0F0FF] border-l-4 border-[#1E90FF] p-4 rounded-r-2xl">
                   <div className="flex items-center justify-between">
                     <span className="text-blue-800 font-medium">With tax cuts, you only paid:</span>
                     <span className="text-2xl font-bold text-blue-900">${taxAfterCuts.toLocaleString()}</span>
@@ -188,7 +206,7 @@ export default function ComprehensiveAnalysisReport({
                 </div>
                 
                 {/* Savings message */}
-                <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded-r-lg">
+                <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded-r-2xl">
                   <div className="flex items-center justify-between">
                     <span className="text-green-800 font-medium">🎉 You have earned $Z from your tax cuts this year!</span>
                     <span className="text-2xl font-bold text-green-900">${taxCutSavings.toLocaleString()}</span>
@@ -199,7 +217,7 @@ export default function ComprehensiveAnalysisReport({
 
             {/* Additional Metrics */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-              <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="bg-[#E0F0FF] p-4 rounded-2xl">
                 <div className="flex items-center">
                   <DollarSign className="h-8 w-8 text-blue-600" />
                   <div className="ml-3">
@@ -208,7 +226,7 @@ export default function ComprehensiveAnalysisReport({
                   </div>
                 </div>
               </div>
-              <div className="bg-green-50 p-4 rounded-lg">
+              <div className="bg-green-50 p-4 rounded-2xl">
                 <div className="flex items-center">
                   <Calculator className="h-8 w-8 text-green-600" />
                   <div className="ml-3">
@@ -217,7 +235,7 @@ export default function ComprehensiveAnalysisReport({
                   </div>
                 </div>
               </div>
-              <div className="bg-purple-50 p-4 rounded-lg">
+              <div className="bg-purple-50 p-4 rounded-2xl">
                 <div className="flex items-center">
                   <TrendingUp className="h-8 w-8 text-purple-600" />
                   <div className="ml-3">
@@ -231,7 +249,7 @@ export default function ComprehensiveAnalysisReport({
         </div>
 
         {/* Financial Breakdown */}
-        <div className="bg-white shadow rounded-lg mb-6">
+        <div className="bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-blue-100/50 mb-6">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">Financial Breakdown</h2>
           </div>
@@ -293,7 +311,7 @@ export default function ComprehensiveAnalysisReport({
         </div>
 
         {/* Tax Optimization Recommendations */}
-        <div className="bg-white shadow rounded-lg mb-6">
+        <div className="bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-blue-100/50 mb-6">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">Tax Optimization Recommendations</h2>
           </div>
@@ -317,7 +335,7 @@ export default function ComprehensiveAnalysisReport({
         </div>
 
         {/* Next Steps */}
-        <div className="bg-white shadow rounded-lg mb-6">
+        <div className="bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-blue-100/50 mb-6">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">Next Steps</h2>
           </div>

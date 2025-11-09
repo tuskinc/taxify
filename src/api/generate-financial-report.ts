@@ -35,17 +35,10 @@ async function fetchReportData(userId: string): Promise<FinancialReportData> {
 
   if (userError) throw userError;
 
-  // Fetch user profile
-  const { data: userProfile, error: profileError } = await supabase
-    .from('user_profiles')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
-
-  if (profileError) throw profileError;
+  // Profile fields are stored directly on users now
 
   // Fetch personal finances
-  const { data: personalFinances, error: personalError } = await supabase
+  const { data: personalFinances, error: _personalError } = await supabase
     .from('personal_finances')
     .select('*')
     .eq('user_id', userId)
@@ -78,7 +71,7 @@ async function fetchReportData(userId: string): Promise<FinancialReportData> {
   }
 
   // Fetch comprehensive analysis
-  const { data: comprehensiveAnalysis, error: analysisError } = await supabase
+  const { data: comprehensiveAnalysis, error: _analysisError } = await supabase
     .from('comprehensive_analyses')
     .select('*')
     .eq('user_id', userId)
@@ -89,7 +82,7 @@ async function fetchReportData(userId: string): Promise<FinancialReportData> {
   return {
     user_id: userId,
     user,
-    user_profile: userProfile,
+    user_profile: user, // backward-compat for template usage
     personal_finances: personalFinances,
     business_finances: businessFinances,
     comprehensive_analysis: comprehensiveAnalysis,
@@ -370,7 +363,7 @@ function generateBusinessAnalysis(doc: jsPDF, data: FinancialReportData) {
   doc.text('• Plan for quarterly estimated tax payments', 50, 280);
 }
 
-function generateCombinedStrategy(doc: jsPDF, data: FinancialReportData) {
+function generateCombinedStrategy(doc: jsPDF, _data: FinancialReportData) {
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(31, 41, 55);
@@ -409,7 +402,7 @@ function generateCombinedStrategy(doc: jsPDF, data: FinancialReportData) {
   doc.text('• State and local tax deductions', 50, 250);
 }
 
-function generateCalendarAndChecklist(doc: jsPDF, data: FinancialReportData) {
+function generateCalendarAndChecklist(doc: jsPDF, _data: FinancialReportData) {
   // Tax Calendar
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');

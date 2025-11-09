@@ -1,12 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary: #2563eb;
-  --bg: #fdf9f6;
-  --accent: #f5f5f5;
+  --primary: #1E90FF;
+  --primary-hover: #1C7ED6;
+  --secondary: #E0F0FF;
+  --secondary-hover: #D1E9FF;
   --text: #111827;
+  --text-light: #6B7280;
+  --bg-gradient-start: #FFFFFF;
+  --bg-gradient-end: #B0E0E6;
 }
 
 html, body, #root {
@@ -15,33 +21,49 @@ html, body, #root {
 
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: 'Inter', 'Roboto', system-ui, -apple-system, Segoe UI, sans-serif;
   color: var(--text);
-  background: var(--bg);
+  background: linear-gradient(to bottom, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  background-attachment: fixed;
 }
 
 @layer components {
-  /* Facebook-style button system */
+  /* Taxify brand button system */
   .btn {
-    @apply inline-flex items-center justify-center min-h-9 px-4 py-3 rounded-md font-semibold select-none;
-    transition: background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    @apply inline-flex items-center justify-center min-h-[36px] pl-4 pr-4 py-3 rounded-2xl font-semibold select-none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
   }
 
   .btn-primary {
-    background-color: #1877f2;
+    background-color: var(--primary);
     color: #ffffff;
   }
-  /* Hover: darken 10%, Active: darken 15% */
-  .btn-primary:hover { background-color: #166fe0; }
-  .btn-primary:active { background-color: #135fdb; }
+  .btn-primary:hover { 
+    background-color: var(--primary-hover);
+    box-shadow: 0 4px 6px rgba(30, 144, 255, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active { 
+    background-color: var(--primary-hover);
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
 
   .btn-secondary {
-    background-color: #e4e6ea;
-    color: #1c1e21;
+    background-color: var(--secondary);
+    color: var(--primary);
+    border: 1px solid rgba(30, 144, 255, 0.2);
   }
-  /* Hover: lighten 5%, Active: darken 15% */
-  .btn-secondary:hover { background-color: #eef0f3; }
-  .btn-secondary:active { background-color: #bcc1c9; }
+  .btn-secondary:hover { 
+    background-color: var(--secondary-hover);
+    box-shadow: 0 2px 4px rgba(30, 144, 255, 0.15);
+    transform: translateY(-1px);
+  }
+  .btn-secondary:active { 
+    background-color: #C8E4FF;
+    transform: translateY(0);
+  }
 
   .btn-danger {
     background-color: #e41e3f;
@@ -105,4 +127,11 @@ body {
 
   /* Auth/Login card container */
   .auth-card { max-width: 400px; margin-left: auto; margin-right: auto; background: #ffffff; padding: 24px; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06); }
+
+  /* Gradient background for Taxify */
+  .bg-gradient-taxify {
+    background: linear-gradient(to bottom, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
 }

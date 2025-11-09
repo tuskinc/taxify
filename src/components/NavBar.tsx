@@ -15,10 +15,10 @@ export default function NavBar({ onBookNow, onGetStarted }: NavBarProps) {
             <span className="text-xl font-serif font-semibold text-[#111827]">Ziam</span>
           </div>
           <nav className="hidden md:flex items-center space-x-8 text-[#111827]">
-            <a href="#home" className="px-4 py-4 hover:text-[#2563eb] transition-colors">Home</a>
-            <a href="#about" className="px-4 py-4 hover:text-[#2563eb] transition-colors">About</a>
-            <a href="#services" className="px-4 py-4 hover:text-[#2563eb] transition-colors">Services</a>
-            <a href="#contact" className="px-4 py-4 hover:text-[#2563eb] transition-colors">Contact</a>
+            <a href="#home" className="pl-4 pr-4 py-4 hover:text-[#2563eb] transition-colors">Home</a>
+            <a href="#about" className="pl-4 pr-4 py-4 hover:text-[#2563eb] transition-colors">About</a>
+            <a href="#services" className="pl-4 pr-4 py-4 hover:text-[#2563eb] transition-colors">Services</a>
+            <a href="#contact" className="pl-4 pr-4 py-4 hover:text-[#2563eb] transition-colors">Contact</a>
             <button
               onClick={onBookNow}
               className="ml-4 btn btn-primary"

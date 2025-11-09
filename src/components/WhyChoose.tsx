@@ -22,7 +22,7 @@ const ITEMS = [
 export default function WhyChoose() {
   return (
     <section className="bg-[#0b1220]" id="about">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto pl-4 pr-4 sm:px-6 lg:px-8 py-16">
         <h2 className="text-3xl font-serif text-white">Why Choose Ziam</h2>
         <p className="mt-2 text-white/70 max-w-2xl">A modern tax platform that balances automation with the human touch.</p>
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -58,7 +58,6 @@ supabase db push
 1. Go to **Table Editor** in Supabase
 2. You should see these tables:
    - `users`
-   - `user_profiles`
    - `tax_scenarios`
    - `personal_finances`
    - `businesses`
@@ -79,7 +78,7 @@ supabase db push
 ## 🔧 What Gets Created
 
 ### Database Tables
-- **User Management**: `users`, `user_profiles`
+- **User Management**: `users`
 - **Financial Data**: `personal_finances`, `businesses`, `business_finances`
 - **Tax Analysis**: `tax_scenarios`, `analysis_results`
 - **Tax Data**: `tax_data`, `tax_calendar`
@@ -130,8 +129,7 @@ Once setup is complete:
 ## 📊 Database Schema Overview
 
 ```
-users (auth)
-├── user_profiles (tax info)
+users (auth + profile fields)
 ├── tax_scenarios (analysis type)
 ├── personal_finances (income/deductions)
 ├── businesses (business entities)

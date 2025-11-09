@@ -3,7 +3,7 @@ import React from 'react'
 export default function SiteFooter() {
   return (
     <footer className="bg-[#0b1220] text-white" id="contact">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid md:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto pl-4 pr-4 sm:px-6 lg:px-8 py-12 grid md:grid-cols-4 gap-8">
         <div>
           <div className="h-9 w-9 rounded-full bg-[#2563eb] text-white flex items-center justify-center font-bold">Z</div>
           <p className="mt-3 text-white/70 text-sm">Ziam — smarter tax planning for everyone.</p>
@@ -38,7 +38,7 @@ export default function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-white/10 py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-sm text-white/60">© {new Date().getFullYear()} Ziam. All rights reserved.</div>
+        <div className="max-w-7xl mx-auto pl-4 pr-4 sm:px-6 lg:px-8 text-sm text-white/60">© {new Date().getFullYear()} Ziam. All rights reserved.</div>
       </div>
     </footer>
   )

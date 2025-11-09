@@ -7,12 +7,22 @@ export default {
   theme: {
     extend: {
       colors: {
+        taxify: {
+          primary: '#1E90FF',
+          'primary-hover': '#1C7ED6',
+          secondary: '#E0F0FF',
+          'secondary-hover': '#D1E9FF',
+          'light-blue': '#E6F3FF',
+        },
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
+          50: '#E6F3FF',
+          100: '#E0F0FF',
+          200: '#D1E9FF',
+          300: '#B8DEFF',
+          400: '#87CEFA',
+          500: '#1E90FF',
+          600: '#1C7ED6',
+          700: '#1868B3',
         },
         success: {
           50: '#f0fdf4',
@@ -34,7 +44,10 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'Roboto', 'system-ui', 'sans-serif'],
+      },
+      backgroundImage: {
+        'gradient-taxify': 'linear-gradient(to bottom, #FFFFFF 0%, #E6F3FF 100%)',
       },
     },
   },
