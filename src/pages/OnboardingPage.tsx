@@ -46,7 +46,7 @@ const OnboardingPage: React.FC = () => {
       navigate('/dashboard');
     } else {
       // Navigate to scenario selection or dashboard
-      navigate('/dashboard');
+    navigate('/dashboard');
     }
   };
 
