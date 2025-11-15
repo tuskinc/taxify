@@ -213,8 +213,7 @@ const TaxOptimizationPage: React.FC = () => {
   const COLORS = ['#1E90FF', '#4AA3FF', '#6BB5FF', '#87CEFA', '#B8DEFF'];
 
   return (
-    <div className="min-h-screen bg-gradient-taxify">
-      <div className="max-w-7xl mx-auto pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
@@ -234,7 +233,7 @@ const TaxOptimizationPage: React.FC = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
+          <div className="card p-6">
             <div className="flex items-center">
               <Calculator className="h-8 w-8 text-red-500" />
               <div className="ml-4">
@@ -244,7 +243,7 @@ const TaxOptimizationPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
+          <div className="card p-6">
             <div className="flex items-center">
               <TrendingUp className="h-8 w-8 text-green-500" />
               <div className="ml-4">
@@ -254,7 +253,7 @@ const TaxOptimizationPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
+          <div className="card p-6">
             <div className="flex items-center">
               <DollarSign className="h-8 w-8 text-[#1E90FF]" />
               <div className="ml-4">
@@ -268,7 +267,7 @@ const TaxOptimizationPage: React.FC = () => {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Tax Comparison Chart */}
-          <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
+          <div className="card p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Tax Comparison</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
@@ -282,11 +281,11 @@ const TaxOptimizationPage: React.FC = () => {
           </div>
 
           {/* Tax Bracket Visualization */}
-          <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
+          <div className="card p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Tax Brackets</h3>
             <div className="space-y-2">
               {optimizationData.taxBrackets.map((bracket, index) => (
-                <div key={index} className={`p-3 rounded-2xl ${bracket.current ? 'bg-[#1E90FF] text-white shadow-md' : 'bg-[#E0F0FF]/50'}`}>
+                <div key={index} className={`p-3 rounded-3xl ${bracket.current ? 'bg-[#1E90FF] text-white shadow-md' : 'bg-gray-50'}`}>
                   <div className="flex justify-between items-center">
                     <span className="font-medium">
                       {bracket.min.toLocaleString()} - {bracket.max === Infinity ? '∞' : bracket.max.toLocaleString()}
@@ -299,15 +298,15 @@ const TaxOptimizationPage: React.FC = () => {
           </div>
         </div>
 
-            {/* Recommendations */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md border border-blue-100/50 mb-8">
-              <div className="pl-6 pr-6 py-4 border-b border-blue-100/50">
-                <h3 className="text-lg font-semibold text-gray-900">AI Tax Recommendations</h3>
+        {/* Recommendations */}
+        <div className="card mb-8">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">AI Tax Recommendations</h3>
           </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  {optimizationData.recommendations.map((rec) => (
-                    <div key={rec.id} className="flex items-start p-4 bg-[#E0F0FF]/50 rounded-2xl border border-blue-100/50">
+          <div className="p-6">
+            <div className="space-y-4">
+              {optimizationData.recommendations.map((rec) => (
+                <div key={rec.id} className="flex items-start p-4 bg-gray-50 rounded-3xl">
                   <div className="flex-shrink-0 mr-4">
                     {rec.priority === 'high' ? (
                       <AlertCircle className="h-6 w-6 text-red-500" />

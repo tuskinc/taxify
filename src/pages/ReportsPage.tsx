@@ -97,7 +97,7 @@ const ReportsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-taxify">
+    <div className="max-w-7xl mx-auto px-6 py-8">
       <ComprehensiveAnalysisReport
         user={user}
         userProfile={userProfile}
