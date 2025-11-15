@@ -91,8 +91,7 @@ const UploadPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-taxify">
-      <div className="max-w-7xl mx-auto pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
@@ -119,11 +118,11 @@ const UploadPage: React.FC = () => {
           </div>
         </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Upload Section */}
-              <div className="lg:col-span-2">
-                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Upload Documents</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Upload Section */}
+          <div className="lg:col-span-2">
+            <div className="card p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Upload Documents</h3>
               <DocumentUpload
                 onUploadComplete={handleDataExtracted}
                 onError={(error) => console.error('Upload error:', error)}
@@ -131,10 +130,10 @@ const UploadPage: React.FC = () => {
             </div>
           </div>
 
-              {/* Upload History */}
-              <div className="lg:col-span-1">
-                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Uploads</h3>
+          {/* Upload History */}
+          <div className="lg:col-span-1">
+            <div className="card p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Uploads</h3>
               {uploadHistory.length === 0 ? (
                 <div className="text-center text-gray-500 py-8">
                   <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
@@ -142,8 +141,8 @@ const UploadPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                      {uploadHistory.map((upload) => (
-                        <div key={upload.id} className="flex items-center p-3 bg-[#E0F0FF]/50 rounded-2xl border border-blue-100/50">
+                  {uploadHistory.map((upload) => (
+                    <div key={upload.id} className="flex items-center p-3 bg-gray-50 rounded-3xl">
                       <div className="flex-shrink-0 mr-3">
                         {upload.status === 'uploaded' ? (
                           <CheckCircle className="h-5 w-5 text-green-500" />
@@ -167,8 +166,8 @@ const UploadPage: React.FC = () => {
               )}
             </div>
 
-                {/* Upload Tips */}
-                <div className="bg-gradient-to-r from-[#1E90FF] to-[#4AA3FF] p-6 rounded-2xl mt-6 text-white shadow-md">
+          {/* Upload Tips */}
+          <div className="card bg-gradient-to-r from-[#1E90FF] to-[#4AA3FF] p-6 mt-6 text-white">
               <h4 className="text-lg font-semibold mb-3">Upload Tips</h4>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-start">

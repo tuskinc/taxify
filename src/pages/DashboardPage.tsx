@@ -62,8 +62,7 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-taxify">
-      <Dashboard
+    <Dashboard
         user={user}
         userProfile={userProfile}
         personalFinances={personalFinances}

@@ -230,8 +230,7 @@ const InvestmentsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-taxify">
-      <div className="max-w-7xl mx-auto pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
@@ -251,7 +250,7 @@ const InvestmentsPage: React.FC = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
+          <div className="card p-6">
             <div className="flex items-center">
               <DollarSign className="h-8 w-8 text-[#1E90FF]" />
               <div className="ml-4">
@@ -261,9 +260,9 @@ const InvestmentsPage: React.FC = () => {
             </div>
           </div>
           
-              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                <div className="flex items-center">
-                  <TrendingUp className="h-8 w-8 text-green-500" />
+          <div className="card p-6">
+            <div className="flex items-center">
+              <TrendingUp className="h-8 w-8 text-green-500" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Current Value</p>
                 <p className="text-2xl font-bold text-green-500">${totalCurrentValue.toLocaleString()}</p>
@@ -271,9 +270,9 @@ const InvestmentsPage: React.FC = () => {
             </div>
           </div>
           
-              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                <div className="flex items-center">
-                  <BarChart3 className="h-8 w-8 text-[#1E90FF]" />
+          <div className="card p-6">
+            <div className="flex items-center">
+              <BarChart3 className="h-8 w-8 text-[#1E90FF]" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Gain/Loss</p>
                 <p className={`text-2xl font-bold ${totalGainLoss >= 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -283,9 +282,9 @@ const InvestmentsPage: React.FC = () => {
             </div>
           </div>
           
-              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                <div className="flex items-center">
-                  <PieChart className="h-8 w-8 text-[#1E90FF]" />
+          <div className="card p-6">
+            <div className="flex items-center">
+              <PieChart className="h-8 w-8 text-[#1E90FF]" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Return %</p>
                 <p className={`text-2xl font-bold ${totalGainLossPercent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -296,9 +295,9 @@ const InvestmentsPage: React.FC = () => {
           </div>
         </div>
 
-            {/* AI Recommendations */}
-            {aiRecommendations.length > 0 && (
-              <div className="bg-gradient-to-r from-[#1E90FF] to-[#4AA3FF] p-6 rounded-2xl mb-8 text-white shadow-md">
+        {/* AI Recommendations */}
+        {aiRecommendations.length > 0 && (
+          <div className="card bg-gradient-to-r from-[#1E90FF] to-[#4AA3FF] p-6 mb-8 text-white">
             <div className="flex items-center mb-4">
               <Lightbulb className="h-6 w-6 mr-2" />
               <h3 className="text-lg font-semibold">AI Investment Insights</h3>
@@ -316,10 +315,10 @@ const InvestmentsPage: React.FC = () => {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Portfolio Allocation Pie Chart */}
-              {portfolioData.length > 0 && (
-                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Portfolio Allocation</h3>
+          {/* Portfolio Allocation Pie Chart */}
+          {portfolioData.length > 0 && (
+            <div className="card p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Portfolio Allocation</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <RechartsPieChart>
                   <Pie
@@ -342,10 +341,10 @@ const InvestmentsPage: React.FC = () => {
               </div>
             )}
 
-              {/* Investment Performance Bar Chart */}
-              {performanceData.length > 0 && (
-                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Investment Performance</h3>
+          {/* Investment Performance Bar Chart */}
+          {performanceData.length > 0 && (
+            <div className="card p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Investment Performance</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={performanceData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -361,9 +360,9 @@ const InvestmentsPage: React.FC = () => {
           )}
         </div>
 
-            {/* Add/Edit Form */}
-            {showAddForm && (
-              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50 mb-8">
+        {/* Add/Edit Form */}
+        {showAddForm && (
+          <div className="card p-6 mb-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
               {editingInvestment ? 'Edit Investment' : 'Add Investment'}
             </h3>
@@ -374,7 +373,7 @@ const InvestmentsPage: React.FC = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1E90FF]"
                   required
                 />
               </div>
@@ -384,7 +383,7 @@ const InvestmentsPage: React.FC = () => {
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1E90FF]"
                 >
                   {investmentTypes.map(type => (
                     <option key={type} value={type}>
@@ -400,10 +399,10 @@ const InvestmentsPage: React.FC = () => {
                   type="number"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1E90FF]"
                   required
                 />
-          </div>
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Current Value</label>
@@ -411,10 +410,10 @@ const InvestmentsPage: React.FC = () => {
                   type="number"
                   value={formData.current_value}
                   onChange={(e) => setFormData({ ...formData, current_value: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1E90FF]"
                   required
                 />
-        </div>
+              </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Date</label>
@@ -422,10 +421,10 @@ const InvestmentsPage: React.FC = () => {
                   type="date"
                   value={formData.purchase_date}
                   onChange={(e) => setFormData({ ...formData, purchase_date: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1E90FF]"
                   required
                 />
-        </div>
+              </div>
 
               <div className="md:col-span-2 flex justify-end space-x-4">
                 <button
@@ -435,14 +434,14 @@ const InvestmentsPage: React.FC = () => {
                     setEditingInvestment(null);
                     setFormData({ name: '', type: 'stocks', amount: 0, current_value: 0, purchase_date: new Date().toISOString().slice(0, 10) });
                   }}
-                  className="pl-4 pr-4 py-2 text-gray-600 hover:text-gray-800"
+                  className="btn btn-secondary"
                 >
                   Cancel
                 </button>
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                    >
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                >
                   {editingInvestment ? 'Update' : 'Add'} Investment
                 </button>
               </div>
@@ -450,10 +449,10 @@ const InvestmentsPage: React.FC = () => {
           </div>
         )}
 
-            {/* Investments List */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md border border-blue-100/50">
-              <div className="pl-6 pr-6 py-4 border-b border-blue-100/50">
-                <h3 className="text-lg font-semibold text-gray-900">Your Investments</h3>
+        {/* Investments List */}
+        <div className="card">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Your Investments</h3>
           </div>
           
           {investments.length === 0 ? (

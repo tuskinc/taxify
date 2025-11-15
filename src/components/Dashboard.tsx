@@ -105,37 +105,10 @@ export default function Dashboard({
   ]
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-blue-100/50">
-        <div className="max-w-7xl mx-auto pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <div className="h-10 w-10 bg-[#1E90FF] rounded-full flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-lg">T</span>
-              </div>
-              <div className="ml-3">
-                <h1 className="text-2xl font-bold text-gray-900">Taxify Dashboard</h1>
-                <p className="text-sm text-gray-600">Welcome back, {userProfile?.email}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={onStartNewAnalysis}
-                className="btn btn-primary flex items-center"
-              >
-                <Calculator className="h-4 w-4 mr-2" />
-                New Analysis
-                </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Financial Overview */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-          <div className="bg-white/90 backdrop-blur-sm overflow-hidden shadow-md rounded-2xl border border-blue-100/50">
+          <div className="card overflow-hidden">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -151,7 +124,7 @@ export default function Dashboard({
             </div>
           </div>
 
-          <div className="bg-white/90 backdrop-blur-sm overflow-hidden shadow-md rounded-2xl border border-blue-100/50">
+          <div className="card overflow-hidden">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -168,7 +141,7 @@ export default function Dashboard({
           </div>
 
           {businessFinances && (
-            <div className="bg-white/90 backdrop-blur-sm overflow-hidden shadow-md rounded-2xl border border-blue-100/50">
+            <div className="card overflow-hidden">
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -185,7 +158,7 @@ export default function Dashboard({
             </div>
           )}
 
-          <div className="bg-white/90 backdrop-blur-sm overflow-hidden shadow-md rounded-2xl border border-blue-100/50">
+          <div className="card overflow-hidden">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -206,8 +179,8 @@ export default function Dashboard({
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Quick Actions */}
-          <div className="bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-blue-100/50">
-            <div className="px-6 py-4 border-b border-blue-100/50">
+          <div className="card">
+            <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
             </div>
             <div className="p-6">
@@ -218,7 +191,7 @@ export default function Dashboard({
                     <button
                       key={index}
                       onClick={action.action}
-                      className="btn btn-primary p-4 text-left transform hover:-translate-y-0.5"
+                      className="btn btn-primary p-4 text-left"
                     >
                       <div className="flex items-center">
                         <Icon className="h-6 w-6 mr-3" />
@@ -235,14 +208,14 @@ export default function Dashboard({
           </div>
 
           {/* Recent Analyses */}
-          <div className="bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-blue-100/50">
-            <div className="px-6 py-4 border-b border-blue-100/50">
+          <div className="card">
+            <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Recent Analyses</h2>
             </div>
             <div className="p-6">
               <div className="space-y-4">
                 {recentAnalyses.map((analysis) => (
-                  <div key={analysis.id} className="flex items-center justify-between p-4 bg-[#E0F0FF]/50 rounded-2xl border border-blue-100/50">
+                  <div key={analysis.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-3xl">
                     <div>
                       <h3 className="text-sm font-semibold text-gray-900">{analysis.title}</h3>
                       <p className="text-sm text-gray-600">{analysis.type} • {analysis.date}</p>
@@ -258,14 +231,14 @@ export default function Dashboard({
         </div>
 
         {/* Upcoming Deadlines */}
-        <div className="mt-8 bg-white/90 backdrop-blur-sm shadow-md rounded-2xl border border-blue-100/50">
-          <div className="px-6 py-4 border-b border-blue-100/50">
+        <div className="mt-8 card">
+          <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Upcoming Tax Deadlines</h2>
           </div>
           <div className="p-6">
             <div className="space-y-4">
               {upcomingDeadlines.map((deadline, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border border-blue-100/50 rounded-2xl bg-white/50">
+                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-3xl bg-white">
                   <div className="flex items-center">
                     <Calendar className="h-5 w-5 text-[#1E90FF] mr-3" />
                     <div>
@@ -287,8 +260,8 @@ export default function Dashboard({
         </div>
 
         {/* Tax Tips */}
-        <div className="mt-8 bg-gradient-to-r from-[#E0F0FF] to-[#D1E9FF] shadow-md rounded-2xl border border-blue-100/50">
-          <div className="px-6 py-4 border-b border-blue-200/50">
+        <div className="mt-8 card bg-gradient-to-r from-[#E0F0FF] to-[#D1E9FF]">
+          <div className="px-6 py-4 border-b border-blue-200">
             <h2 className="text-lg font-semibold text-gray-900">Tax Tips for You</h2>
           </div>
           <div className="p-6">

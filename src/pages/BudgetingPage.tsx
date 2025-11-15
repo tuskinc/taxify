@@ -203,8 +203,7 @@ const BudgetingPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-taxify">
-      <div className="max-w-7xl mx-auto pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
@@ -222,19 +221,19 @@ const BudgetingPage: React.FC = () => {
           </div>
         </div>
 
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                <div className="flex items-center">
-                  <TrendingUp className="h-8 w-8 text-[#1E90FF]" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Income</p>
-                    <p className="text-2xl font-bold text-gray-900">${totalIncome.toLocaleString()}</p>
-                  </div>
-                </div>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="card p-6">
+            <div className="flex items-center">
+              <TrendingUp className="h-8 w-8 text-[#1E90FF]" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Income</p>
+                <p className="text-2xl font-bold text-gray-900">${totalIncome.toLocaleString()}</p>
               </div>
-              
-              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
+            </div>
+          </div>
+          
+          <div className="card p-6">
             <div className="flex items-center">
               <TrendingDown className="h-8 w-8 text-red-500" />
               <div className="ml-4">
@@ -244,9 +243,9 @@ const BudgetingPage: React.FC = () => {
             </div>
           </div>
           
-              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                <div className="flex items-center">
-                  <DollarSign className="h-8 w-8 text-[#1E90FF]" />
+          <div className="card p-6">
+            <div className="flex items-center">
+              <DollarSign className="h-8 w-8 text-[#1E90FF]" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Net Income</p>
                 <p className={`text-2xl font-bold ${netIncome >= 0 ? 'text-green-600' : 'text-red-500'}`}>
@@ -257,9 +256,9 @@ const BudgetingPage: React.FC = () => {
           </div>
         </div>
 
-            {/* AI Suggestions */}
-            {aiSuggestions.length > 0 && (
-              <div className="bg-gradient-to-r from-[#1E90FF] to-[#4AA3FF] p-6 rounded-2xl mb-8 text-white shadow-md">
+        {/* AI Suggestions */}
+        {aiSuggestions.length > 0 && (
+          <div className="card bg-gradient-to-r from-[#1E90FF] to-[#4AA3FF] p-6 mb-8 text-white">
             <div className="flex items-center mb-4">
               <Lightbulb className="h-6 w-6 mr-2" />
               <h3 className="text-lg font-semibold">AI Budget Insights</h3>
@@ -275,12 +274,12 @@ const BudgetingPage: React.FC = () => {
           </div>
         )}
 
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Expense Breakdown Pie Chart */}
-              {expenseData.length > 0 && (
-                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Expense Breakdown</h3>
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Expense Breakdown Pie Chart */}
+          {expenseData.length > 0 && (
+            <div className="card p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Expense Breakdown</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -303,10 +302,10 @@ const BudgetingPage: React.FC = () => {
             </div>
           )}
 
-              {/* Monthly Income vs Expenses */}
-              {monthlyChartData.length > 0 && (
-                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Trends</h3>
+          {/* Monthly Income vs Expenses */}
+          {monthlyChartData.length > 0 && (
+            <div className="card p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Trends</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -322,9 +321,9 @@ const BudgetingPage: React.FC = () => {
           )}
         </div>
 
-            {/* Add/Edit Form */}
-            {showAddForm && (
-              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-blue-100/50 mb-8">
+        {/* Add/Edit Form */}
+        {showAddForm && (
+          <div className="card p-6 mb-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
               {editingItem ? 'Edit Budget Item' : 'Add Budget Item'}
             </h3>
@@ -335,7 +334,7 @@ const BudgetingPage: React.FC = () => {
                   type="text"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1E90FF]"
                   required
                 />
               </div>
@@ -346,7 +345,7 @@ const BudgetingPage: React.FC = () => {
                   type="number"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1E90FF]"
                   required
                 />
               </div>
@@ -356,7 +355,7 @@ const BudgetingPage: React.FC = () => {
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value as 'income' | 'expense' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1E90FF]"
                 >
                   <option value="income">Income</option>
                   <option value="expense">Expense</option>
@@ -369,7 +368,7 @@ const BudgetingPage: React.FC = () => {
                   type="month"
                   value={formData.month}
                   onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1E90FF]"
                   required
                 />
               </div>
@@ -382,14 +381,14 @@ const BudgetingPage: React.FC = () => {
                     setEditingItem(null);
                     setFormData({ category: '', amount: 0, type: 'expense', month: new Date().toISOString().slice(0, 7) });
                   }}
-                  className="pl-4 pr-4 py-2 text-gray-600 hover:text-gray-800"
+                  className="btn btn-secondary"
                 >
                   Cancel
                 </button>
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                    >
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                >
                   {editingItem ? 'Update' : 'Add'} Item
                 </button>
               </div>
@@ -397,10 +396,10 @@ const BudgetingPage: React.FC = () => {
           </div>
         )}
 
-            {/* Budget List */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md border border-blue-100/50">
-              <div className="pl-6 pr-6 py-4 border-b border-blue-100/50">
-                <h3 className="text-lg font-semibold text-gray-900">Budget Items</h3>
+        {/* Budget List */}
+        <div className="card">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Budget Items</h3>
           </div>
           
           {budgets.length === 0 ? (

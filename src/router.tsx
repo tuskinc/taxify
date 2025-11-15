@@ -54,9 +54,9 @@ const ProtectedLayout: React.FC<ProtectedLayoutProps> = ({ children }) => {
   }, []);
 
   return (
-    <div className="flex h-screen">
+    <div className="min-h-screen bg-gradient-taxify">
       <Navigation user={user} />
-      <div className="flex-1 lg:ml-64">
+      <div className="page-wrapper">
         {children}
       </div>
     </div>

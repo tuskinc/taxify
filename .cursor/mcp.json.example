@@ -1,4 +1,4 @@
-﻿{
+{
   "mcpServers": {
     "supabase": {
       "command": "cmd",
@@ -13,3 +13,4 @@
     }
   }
 }
+
