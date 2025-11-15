@@ -345,15 +345,15 @@ const TaxOptimizationPage: React.FC = () => {
           </div>
         </div>
 
-            {/* Deductions Overview */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md border border-blue-100/50">
-              <div className="pl-6 pr-6 py-4 border-b border-blue-100/50">
-                <h3 className="text-lg font-semibold text-gray-900">Available Deductions</h3>
+        {/* Deductions Overview */}
+        <div className="card">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Available Deductions</h3>
           </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {optimizationData.deductions.map((deduction, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-[#E0F0FF]/50 rounded-2xl border border-blue-100/50">
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {optimizationData.deductions.map((deduction, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-3xl">
                       <div>
                         <h4 className="font-semibold text-gray-900">{deduction.name}</h4>
                         <p className="text-sm text-gray-600">
@@ -375,7 +375,6 @@ const TaxOptimizationPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

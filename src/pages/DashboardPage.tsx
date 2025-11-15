@@ -74,7 +74,6 @@ const DashboardPage: React.FC = () => {
         onTaxCalendar={() => navigate('/tax-calendar')}
         onTaxOptimization={() => navigate('/optimize-tax')}
       />
-    </div>
   );
 };
 

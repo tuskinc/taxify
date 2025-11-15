@@ -120,8 +120,7 @@ const TaxCalendarPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-taxify">
-      <div className="max-w-7xl mx-auto pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
@@ -140,7 +139,7 @@ const TaxCalendarPage: React.FC = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card p-6">
             <div className="flex items-center">
               <AlertCircle className="h-8 w-8 text-red-600" />
               <div className="ml-4">
@@ -150,7 +149,7 @@ const TaxCalendarPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card p-6">
             <div className="flex items-center">
               <Clock className="h-8 w-8 text-yellow-600" />
               <div className="ml-4">
@@ -160,7 +159,7 @@ const TaxCalendarPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card p-6">
             <div className="flex items-center">
               <CheckCircle className="h-8 w-8 text-green-600" />
               <div className="ml-4">
@@ -170,7 +169,7 @@ const TaxCalendarPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card p-6">
             <div className="flex items-center">
               <Calendar className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
@@ -188,7 +187,7 @@ const TaxCalendarPage: React.FC = () => {
               <AlertCircle className="h-5 w-5 mr-2" />
               Overdue Deadlines
             </h2>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <div className="card bg-red-50 border border-red-200 p-6">
               {overdueDeadlines.map((deadline) => (
                 <div key={deadline.id} className="flex items-center justify-between py-3 border-b border-red-200 last:border-b-0">
                   <div className="flex items-center">
@@ -226,7 +225,7 @@ const TaxCalendarPage: React.FC = () => {
             <Clock className="h-5 w-5 mr-2" />
             Upcoming Deadlines
           </h2>
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             {upcomingDeadlines.length === 0 ? (
               <div className="p-6 text-center text-gray-500">
                 <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-400" />
@@ -275,7 +274,7 @@ const TaxCalendarPage: React.FC = () => {
               <CheckCircle className="h-5 w-5 mr-2" />
               Completed Deadlines
             </h2>
-            <div className="bg-white rounded-lg shadow">
+            <div className="card">
               <div className="divide-y divide-gray-200">
                 {completedDeadlines.map((deadline) => (
                   <div key={deadline.id} className="p-6">
@@ -307,7 +306,6 @@ const TaxCalendarPage: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 };

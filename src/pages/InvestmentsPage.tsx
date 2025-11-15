@@ -526,7 +526,6 @@ const InvestmentsPage: React.FC = () => {
           </div>
           )}
         </div>
-      </div>
     </div>
   );
 };

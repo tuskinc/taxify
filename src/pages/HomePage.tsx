@@ -5,8 +5,12 @@ import LandingPage from '../components/LandingPage';
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
+  const handleGetStarted = () => {
+    void navigate('/login');
+  };
+
   return (
-    <LandingPage onGetStarted={() => navigate('/login')} />
+    <LandingPage onGetStarted={handleGetStarted} />
   );
 };
 

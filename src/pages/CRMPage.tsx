@@ -112,8 +112,7 @@ const CRMPage: React.FC = () => {
   const pendingCount = integrations.filter(i => i.status === 'pending').length;
 
   return (
-    <div className="min-h-screen bg-gradient-taxify">
-      <div className="max-w-7xl mx-auto pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
@@ -132,7 +131,7 @@ const CRMPage: React.FC = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card p-6">
             <div className="flex items-center">
               <CheckCircle className="h-8 w-8 text-green-600" />
               <div className="ml-4">
@@ -142,7 +141,7 @@ const CRMPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card p-6">
             <div className="flex items-center">
               <AlertCircle className="h-8 w-8 text-yellow-600" />
               <div className="ml-4">
@@ -152,7 +151,7 @@ const CRMPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card p-6">
             <div className="flex items-center">
               <Building className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
@@ -164,7 +163,7 @@ const CRMPage: React.FC = () => {
         </div>
 
         {/* Integration Instructions */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+        <div className="card bg-blue-50 border border-blue-200 p-6 mb-8">
           <div className="flex items-start">
             <Link className="h-6 w-6 text-blue-600 mt-1 mr-3" />
             <div>
@@ -182,7 +181,7 @@ const CRMPage: React.FC = () => {
         {/* CRM Integrations */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {integrations.map((integration) => (
-            <div key={integration.id} className="bg-white rounded-lg shadow p-6">
+            <div key={integration.id} className="card p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center">
                 <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
@@ -260,7 +259,7 @@ const CRMPage: React.FC = () => {
         </div>
 
         {/* Data Sync Information */}
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
+        <div className="mt-8 card p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Data Sync Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -283,8 +282,7 @@ const CRMPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
-        </div>
+    </div>
   );
 };
 

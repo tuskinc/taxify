@@ -186,11 +186,11 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 pl-4 pr-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-taxify py-12 px-6">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-xl">Z</span>
+          <div className="mx-auto h-12 w-12 bg-[#1E90FF] rounded-full flex items-center justify-center">
+            <User className="h-6 w-6 text-white" />
           </div>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
             Complete Your Profile
@@ -200,7 +200,7 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
           </p>
         </div>
 
-        <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+        <div className="card py-8 px-6 sm:px-10">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {error && (
               <div className="flex items-center space-x-2 text-red-600 text-sm">
@@ -220,7 +220,7 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
                   </div>
                   <select
                     {...register('country')}
-                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-[#1E90FF] focus:border-[#1E90FF] sm:text-sm"
                   >
                     <option value="">Select your country</option>
                     {countries.map((country) => (
@@ -245,7 +245,7 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
                   </div>
                   <select
                     {...register('filing_status')}
-                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-[#1E90FF] focus:border-[#1E90FF] sm:text-sm"
                   >
                     <option value="">Select filing status</option>
                     {filingStatuses.map((status) => (
@@ -293,7 +293,7 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
                     {...register('dependents', { valueAsNumber: true })}
                     type="number"
                     min="0"
-                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-[#1E90FF] focus:border-[#1E90FF] sm:text-sm"
                     placeholder="0"
                   />
                 </div>
@@ -315,7 +315,7 @@ export default function UserProfileSetup({ user, onComplete }: UserProfileSetupP
                     type="number"
                     min="0"
                     step="0.01"
-                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-[#1E90FF] focus:border-[#1E90FF] sm:text-sm"
                     placeholder="0.00"
                   />
                 </div>

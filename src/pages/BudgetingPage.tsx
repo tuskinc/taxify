@@ -461,7 +461,6 @@ const BudgetingPage: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 };

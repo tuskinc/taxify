@@ -55,7 +55,7 @@ const UploadPage: React.FC = () => {
       setUploadHistory((data || []).map(item => ({
         id: item.id,
         filename: item.filename || 'Unknown file',
-        status: item.status || 'uploaded',
+        status: (item.status as 'uploaded' | 'failed' | 'processing') || 'uploaded',
         uploaded_at: item.created_at || new Date().toISOString(),
         file_size: item.file_size || 0,
         file_type: item.file_type || 'unknown'
@@ -190,7 +190,6 @@ const UploadPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

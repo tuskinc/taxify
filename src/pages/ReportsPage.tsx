@@ -100,10 +100,8 @@ const ReportsPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-6 py-8">
       <ComprehensiveAnalysisReport
         user={user}
-        userProfile={userProfile}
         personalFinances={personalFinances}
         businessFinances={businessFinances}
-        onComplete={() => navigate('/dashboard')}
         onBackToDashboard={handleBackToDashboard}
       />
     </div>
